@@ -20,14 +20,6 @@ More information on the various parts below.
 
 Pull requests gladly accepted.
 
-## The crawler
-
-
-
-## The updater
-
-
-
-## The web-api server
+## Notes
 
 As for what tech stack will support the web-api server, or for that matter, what language it will use (since Python isn't required) that has not yet been decided. At time of writing, either a Django or Node.js options are being considered, though suggestions are welcome. 
