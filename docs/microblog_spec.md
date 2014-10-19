@@ -1,15 +1,3 @@
-<head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-<link href='http://fonts.googleapis.com/css?family=Average' rel='stylesheet' type='text/css'>
-<link rel="stylesheet" type="text/css" href="http://brianschrader.com/bin/CSS/stylesheet.css">
-<link rel="stylesheet" type="text/css" href="http://brianschrader.com/bin/CSS/mobile.css">
-<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
-<script src="http://yandex.st/highlightjs/8.0/highlight.min.js"></script>
-</head>
-<body>
-<script>hljs.initHighlightingOnLoad();</script>
-<div class='post-list'><div class='post'><div class='article-content'>
 
 # Open Microblog
 ================================================================
