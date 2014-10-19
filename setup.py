@@ -1,5 +1,5 @@
 from distutils.core import setup
-# TODO
+
 setup(
     name='Microblogger',
     version='0.0.1',
@@ -7,11 +7,10 @@ setup(
     author_email='brian@biteofanapple.com',
     packages=['microblogger', 'microblogger.test'],
     scripts=[], # TODO: Add bin/ scripts here.
-    url='', # TODO: Add
+    url='https://github.com/Sonictherocketman/Microblogger',
     license='LICENSE.txt',
-    description='', # TODO: Add
-    long_description=open('README.txt').read(),
+    description='The first microblogging service implementing the Open Microblog standard. It is intended to be a base implementation of the standard; a proof of concept for the standard.',
+    long_description=open('README.md').read(),
     install_requires=[
-        "Django >= 1.1.1"
         ],
     )
