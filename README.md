@@ -6,7 +6,7 @@ The first microblogging service implementing the [Open Microblog][1] standard. I
 
 The Microblogger service is designed to have 4 parts: the crawler, the updater, the web-api server, and the caching database. The crawlers being the most important part since they need to be able to operate at close to real time. Each part is a Python sub-package in the overall microblog package. The idea being that anyone could pull the source, add their backing store and caching database and be have basic service either for themselves or for a business.
 
-Although this is a predominantly Python project (the crawler and updater will be in Python) the front end is still up for debate. Python is preferred but Node.js is being considered. The caching database will use [MongoDB][2] which is not really up for debate, unless you have a really convincing argument.
+Web2py is the current front-runner for the Python web framework (the case against Django is that its enormous and could become a huge hinderance in the future). -Although this is a predominantly Python project (the crawler and updater will be in Python) the front end is still up for debate. Python is preferred but Node.js is being considered.- The caching database will use [MongoDB][2] which is not really up for debate, unless you have a really convincing argument.
 
 [2]: http://www.mongodb.com
 
