@@ -7,6 +7,9 @@ from lxml.builder import E
 from lxml import CDATA
 
 
+# Generate new feeds.
+
+
 def generate_new_feed(location='user/feed.xml'):
     """ Creates a blank XML feed and writes it. To fill in the
     information for the feed use the other helper methods provided. """
@@ -29,9 +32,8 @@ def generate_new_feed(location='user/feed.xml'):
                 E.reply_status_id(),
                 E.user_link()
                 )
-            E.item('')
             )
-    u.write_user_feed(feed)
+    u.write_user_feed(feed, location)
 
 
 def generate_new_block_list(rel_location='user/blocks.xml'):
@@ -39,7 +41,14 @@ def generate_new_block_list(rel_location='user/blocks.xml'):
     the default location.
 
     Warning: Does not migrate old lists. """
-    # TODO
+    feed = E.channel(count='0'
+            E.username(''),
+            E.user_id(''),
+            E.link(''),
+            E.next_node(''),
+            E.lastBuildDate(''),
+            )
+   u.write_user_feed(feed, location)
 
 
 def generate_new_follows_list(rel_location='user/follows.xml'):
@@ -47,7 +56,17 @@ def generate_new_follows_list(rel_location='user/follows.xml'):
     the default location.
 
     Warning: Does not migrate old lists. """
-    # TODO
+    feed = E.channel(count='0'
+            E.username(''),
+            E.user_id(''),
+            E.link(''),
+            E.next_node(''),
+            E.lastBuildDate(''),
+            )
+   u.write_user_feed(feed, location)
+
+
+# Set user feed values.
 
 
 def set_username(username):
@@ -94,13 +113,13 @@ def set_reply_to(url='', reply_to_user_id):
     provided, the feed's user_id is used, if found. If not, raise
     InformationNotProvidedError. Past feed nodes are unaffected. """
     feed = u.get_user_feed('user/feed.xml')
-    reply_to_user_id_element = feed.XPath('//chanel/reply_to/reply_to_user_id')
+    reply_to_user_id_element = feed.XPath('/channel/reply_to/reply_to_user_id')
     if reply_to_user_id_element:
         if reply_to_user_id is None:
-            reply_to_user_id = feed.XPath('//channel/user_id')[0].text
+            reply_to_user_id = feed.XPath('/channel/user_id')[0].text
         reply_to_user_id_element[0].text = reply_to_user_id
 
-    reply_to_link_element = feed.XPath('//channel/reply_to/link')
+    reply_to_link_element = feed.XPath('/channel/reply_to/link')
     if reply_to_link_element:
         reply_to_link_element[0].text = url
 
@@ -111,19 +130,33 @@ def set_docs_url(url):
     """ Sets the documentation url for the feed. Past feed
     nodes are unaffected. """
     feed = u.get_user_feed('user/feed.xml')
-    reply_to_user_element = feed.XPath('//chanel/docs')
+    reply_to_user_element = feed.XPath('/channel/docs')
     if element:
         element[0].text = username
     u.write_user_feed(feed, 'user/feed.xml')
 
 
+# Set blocks list values.
+
+
 def set_blocks_url(url):
     """ Sets the url for the user's block list. """
-    # TODO
+    feed = u.get_user_feed('user/blocks.xml')
+    reply_to_user_element = feed.XPath('/channel/link')
+    if element:
+        element[0].text = username
+    u.write_user_feed(feed, 'user/blocks.xml')
+
+
+# Set follows list values.
 
 
 def set_follows_url(url):
     """ Sets the url for the user's following list. """
-    # TODO
+    feed = u.get_user_feed('user/follows.xml')
+    reply_to_user_element = feed.XPath('/channel/link')
+    if element:
+        element[0].text = username
+    u.write_user_feed(feed, 'user/follows.xml')
 
 
