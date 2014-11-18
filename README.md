@@ -1,14 +1,12 @@
 # Microblogger
 
-The first microblogging service implementing the [Open Microblog][1] standard. It is intended to be a base implementation of the standard; a proof of concept for the standard.
+A basic microblogging service implementing the [Open Microblog][1] standard. It is intended to be a base implementation of the standard; a proof of concept for the standard.
 
 [1]: https://github.com/Sonictherocketman/Open-Microblog
 
-The Microblogger service is designed to have 4 parts: the crawler, the updater, the web-api server, and the caching database. The crawlers being the most important part since they need to be able to operate at close to real time. Each part is a Python sub-package in the overall microblog package. The idea being that anyone could pull the source, add their backing store and caching database and be have basic service either for themselves or for a business.
+The service is designed to be a 'self-hosted' solution. It has 3 parts: the crawler, the feed managers, and the web-api server.
 
-Web2py is the current front-runner for the Python web framework (the case against Django is that its enormous and could become a huge hinderance in the future). -Although this is a predominantly Python project (the crawler and updater will be in Python) the front end is still up for debate. Python is preferred but Node.js is being considered.- The caching database will use [MongoDB][2] which is not really up for debate, unless you have a really convincing argument.
-
-[2]: http://www.mongodb.com
+## Notes
 
 The crawling system should not only be able to request, process, and store feeds quickly, but it should also be able to process as many feeds as possible at once. Its only job is to do those three steps (request, process, store) as quickly as possible. The crawler should not be bothered with business logic or user facing features.
 
@@ -19,11 +17,5 @@ As for the web-api server, it should not comprise any HTML pages, instead it sho
 More information on the various parts below.
 
 Pull requests gladly accepted.
-
-## Notes
-
-As for what tech stack will support the web-api server, or for that matter, what language it will use (since Python isn't required) that has not yet been decided. At time of writing, either a Django or Node.js options are being considered, though suggestions are welcome. 
-
-
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Microblogger</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Brian Schrader</span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="https://github.com/Sonictherocketman/Microblogger" rel="dct:source">https://github.com/Sonictherocketman/Microblogger</a>.
