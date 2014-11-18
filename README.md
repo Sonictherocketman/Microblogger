@@ -12,7 +12,9 @@ The crawling system should not only be able to request, process, and store feeds
 
 The updater's job is to accept requests to update a user's feed and write to the feed. It should also handle the pagination process once a user's feed surpasses the standard size/length, and creating new feeds for new users. It should not be concerned with business logic.
 
-As for the web-api server, it should not comprise any HTML pages, instead it should be the front end for the JSON based REST APIs. Its many duties include, fulfilling requests for new posts to a given user, handling message passing (for replies/mentions), delegating tasks to the crawler and updater for on-demand crawling/updating when the desired data is not in the cache (if provided).
+As for the web-api server, it should not comprise any HTML pages, instead it should be the front end for the JSON based REST APIs. Its many duties include, fulfilling requests for new posts to a given user, handling message passing (for replies/mentions), delegating tasks to the crawler and updater for on-demand crawling/updating when the desired data is not in the cache (if provided). The web-api server will be run on [Flask][2].
+
+[2]: http://flask.pocoo.org/ 
 
 More information on the various parts below.
 
