@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Modifies the user's main feed.  """
 
 from lxml import etree
@@ -11,24 +12,28 @@ from .. import post
 from .. import util as u
 
 
-def add_post(post):
-    """ Adds the given post to the user's feed.  """
+def add_post(new_post):
+    """ Adds the given post to the user's feed. """
     tree = _get_user_feed('user/feed.xml')
     items = tree.XPath('//items')
-    items.insert(0, post.to_element(post))
+    items.insert(0, post.to_element(new_post))
     u.write_user_feed(tree, 'user/feed.xml')
 
 
-def fetch(start, n=20):
+def fetch(start, n=0):
     """ Starting at the starting post id, fetches n posts (assuming the posts are ordered).
-    Positive n for posts since start, negative n for previous posts. """
+    Positive n for posts since start, negative n for previous posts.
+    Zero (or nothing) for only the post with the given id. """
 
     # Get the tree, exract the starting point.
     tree = u.get_user_feed('user/feed.xml')
-    stati = [post(status) for status in tree.XPath('/channel/item/item[@guid]')]
+    stati = [post(status) for status in tree.XPath('/channel/item[@guid]')]
 
     starting = stati.index([status for status in stati if status['guid'] == start][0])
 
+    # Get only the single post.
+    if n == 0:
+        return starting
     # Get n posts.
     if len(stati[starting:]) < abs(n):
         if n > 0:
@@ -44,7 +49,7 @@ def fetch_top(n=20):
         raise IndexError
 
     tree = u.get_user_feed('user/feed.xml')
-    stati = [post(status) for status in tree.XPath('/channel/items/item[@guid]')]
+    stati = [post(status) for status in tree.XPath('/channel/item[@guid]')]
     return stati[:n]
 
 

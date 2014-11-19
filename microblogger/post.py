@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ A Python wrapper for the XML item elements.  """
 
 from lxml.etree import element

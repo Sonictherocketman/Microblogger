@@ -6,6 +6,10 @@ A basic microblogging service implementing the [Open Microblog][1] standard. It 
 
 The service is designed to be a 'self-hosted' solution. It has 3 parts: the crawler, the feed managers, and the web-api server.
 
+## Running microblogger
+
+When its all said and done, the goal is to be able to run the microblogger as easily as `python microblogger.py`.
+
 ## Notes
 
 The crawling system should not only be able to request, process, and store feeds quickly, but it should also be able to process as many feeds as possible at once. Its only job is to do those three steps (request, process, store in cache) as quickly as possible. The crawler should not be bothered with business logic or user facing features.

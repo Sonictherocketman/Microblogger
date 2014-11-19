@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Utilities for doing basic feed file IO.  """
 
 from lxml.etree import etree
