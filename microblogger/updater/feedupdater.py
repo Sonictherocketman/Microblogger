@@ -7,8 +7,8 @@ from datetime.datetime import strptime
 
 import time
 
-from microblogger import post
-from microblogger import util as u
+from .. import post
+from .. import util as u
 
 
 def add_post(post):

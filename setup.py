@@ -12,6 +12,7 @@ setup(
     description='The first microblogging service implementing the Open Microblog standard. It is intended to be a base implementation of the standard; a proof of concept for the standard.',
     long_description=open('README.md').read(),
     install_requires=[
-    	'flask'
+    	'flask',
+        'lxml'
         ],
     )

@@ -1,7 +1,7 @@
 """ Creates the base user feed.  """
 
-from microblogger.post import post
-from microblogger import util as u
+from . import post
+from . import util as u
 
 from lxml.builder import E
 from lxml import CDATA
