@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#!/usr/local/bin/python
 """ The web-api server.
 
 Running this will start the server, do initial setup
@@ -40,6 +41,11 @@ SETTINGS = '/tmp/microblogger_settings.json'
 ROOT_DIR = '/var/www/microblogger/'
 
 
+# Init the application
+app = Flask(__name__)
+app.config.from_object(__name__)
+
+
 # Admin and setup
 
 
@@ -48,7 +54,7 @@ def init_cache():
     passes if a cache already exists. To clear it,
     delete the cache file. """
     if not os.path.isfile(CACHE):
-        cache = {[]}
+        cache = {}
         with open(CACHE, 'w') as f:
             f.write(json.dumps(cache))
 
@@ -61,7 +67,7 @@ def init_settings():
     will be no way for you to log into your account
     once this file is deleted. """
     if not os.path.isfile(SETTINGS):
-        settings = {[]}
+        settings = {}
         with open(SETTINGS, 'w') as f:
             f.write(json.dumps(settings))
 
@@ -123,7 +129,7 @@ def home():
     recent posts) for public viewing. """
     if not g.user:
         return redirect(url_for('user_timeline'))
-    return render_template('timeline.html', messages=fu.fetch()
+    return render_template('timeline.html', messages=fu.fetch())
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -183,13 +189,12 @@ def login():
         error = ''
         pwd_hash = from_settings('pwd_hash')
         if from_settings('username') != username:
-            error = 'Invalid username')
+            error = 'Invalid username'
         elif not check_password_hash(pwd_hash, password):
-            error = 'Invalid password')
+            error = 'Invalid password'
         else:
             session['user_id'] = username
             return redirect(url_for('home'))
-
     return render_template('login.html', error=error)
 
 
@@ -204,8 +209,8 @@ def logout():
         render_template('logout.html')
 
 
-@app.route('/<user_id>')
-def user_timeline(user_id):
+@app.route('/public')
+def user_timeline():
     """ Shows the user's public timeline (their most
     recent posts). This is the only timeline view that
     an unauthenticated user can see. """
@@ -221,15 +226,16 @@ def individual_post(post_id):
 # REST APIs
 
 
-@app.route('/api/timeline/home_timeline/', methods=['GET'])
-def home_timeline():
+@app.route('/api/timeline/home_timeline', methods=['GET'])
+def api_home_timeline():
     """ Returns the 100 most recent posts in the
     user's home timeline. """
     # TODO Get timeline
+    print 'Hi. You\'ve reached the user timeline.'
 
 
-@app.route('/api/timeline/user_timeline/', methods=['GET'])
-def user_timeline():
+@app.route('/api/timeline/user_timeline', methods=['GET'])
+def api_user_timeline():
     """ Returns the 100 most recent posts in the
     timeline of the user indicated. If no user is
     indicated, then the authenticated user is used.
@@ -242,7 +248,6 @@ def user_timeline():
     user_id = request.args.get('user_id')
     user_link = request.args.get('user_link')
     username = request.args.get('username')
-
     # TODO Get posts.
 
 
@@ -267,10 +272,6 @@ def user_timeline():
 
 
 if __name__ == '__main__':
-   # Init the application
-    app = Flask(__name__)
-    app.config.from_object(__name__)
-    os.chdir(ROOT_DIR)
     init_cache()
     init_settings()
 

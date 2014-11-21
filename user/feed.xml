@@ -1,1 +1,22 @@
-<!-- An empty user feed -->
+<rss version="2.0" extension="microblog">
+    <channel>
+        <username>my_sample_username</username>
+        <user_id>1234567890</user_id>
+        <user_full_name>Asample User</user_full_name>
+        <description><![CDATA[Hello. I do things.]]></description>
+        <link>127.0.0.1:5000</link>
+        <blocks count=""></blocks>
+        <follows count=""></follows>
+        <reply_to>
+            <link>http://service.tld/reply</link>
+            <reply_to_user_id>sample_userid</reply_to_user_id>
+            <reply_to_status_id />
+            <reply_from_user_id />
+            <reply_status_id />
+            <user_link />
+        </reply_to>
+        <docs>http://example.com/docs</docs>
+        <language>en</language>
+        <lastBuildDate></lastBuildDate>
+    </channel>
+</rss>
