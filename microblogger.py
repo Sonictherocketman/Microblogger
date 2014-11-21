@@ -29,12 +29,12 @@ from werkzeug import check_password_hash, generate_password_hash
 
 import os
 import json
+import re
 
 from feed import feedgenerator as fg, feedupdater as fu
 
 # Configuration
 DEBUG = True
-SECRET_KEY = 'find some secret key.'
 CACHE = '/tmp/microblogger_cache.json'
 SETTINGS = '/tmp/microblogger_settings.json'
 ROOT_DIR = '/var/www/microblogger/'
@@ -67,7 +67,7 @@ def init_settings():
 
 
 def from_cache(key):
-    """ Fetches values from the cache. """
+    """ Fetches a value from the cache. """
     if os.path.isfile(CACHE):
         with open(CACHE, 'r') as f:
             cache = json.loads(f.read())
@@ -75,13 +75,35 @@ def from_cache(key):
                 return cache[key]
 
 
-def from_settings(key):
-    """ Fetches values from the cache. """
+def to_cache(key, value):
+    """ Adds a value to the settings file. """
     if os.path.isfile(CACHE):
+        with open(CACHE, 'r+') as f:
+                current_settings = json.loads(f.read())
+                current_settings[key] = value
+                f.seek(0)
+                f.write(json.dumps(current_settings))
+                f.truncate()
+
+
+def from_settings(key):
+    """ Fetches a value from the settings. """
+    if os.path.isfile(SETTINGS):
         with open(SETTINGS, 'r') as f:
             settings = json.loads(f.read())
             if key in settings.keys():
                 return cache[key]
+
+
+def to_settings(key, value):
+    """ Adds a value to the settings file. """
+    if os.path.isfile(SETTINGS):
+        with open(SETTINGS, 'r+') as f:
+                current_settings = json.loads(f.read())
+                current_settings[key] = value
+                f.seek(0)
+                f.write(json.dumps(current_settings))
+                f.truncate()
 
 
 # Site pages
@@ -112,12 +134,38 @@ def register():
 
     if request.method == 'POST':
         error = None
-        # TODO: Registration logic
-        if registration_successful:
-            session['user_id'] = user['user_id']
-            return redirect(url_for('home'))
+
+        username = request.form['username']
+        password = request.form['password']
+        password_confirm = request.form['password_confirm']
+        email = request.form['email']
+
+        if from_settings('username') is not None:
+            error = 'Only 1 user is allowed to register. Sign into, \
+                    or delete your old account.'
+        elif username is None:
+            error = 'No username provided.'
+        elif len(username) < 8 or len(username) > 25:
+            error = 'Username is not the correct length. \
+                    Please enter a username between 8-25 characters.'
+        elif re.search('[^a-zA-Z0-9\_]', username) is not None:
+            error = 'Usernames can only contain letters an numbers.'
+        elif re.search('\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b', email) is not None:
+            error = 'Please enter a valid email address.'
+        elif password is None or password_confirm is None:
+            error = 'You must fill in your password.'
+        elif password != request.form['password_confirm']:
+            error = 'Passwords do not match.'
+        elif len(password) < 8 or re.search('[a-zA-Z0-9]', password) is not None:
+            error = 'Your password must be at least 8 characters long and \
+                    must be a combination of numbers and letters. Special\
+                    characters are allowed and encouraged.'
         else:
-            return render_template('registration.html', error=error)
+            to_settings('username', username)
+            to_settings('pwd_hash', generate_password_hash(password))
+            return redirect(url_for('home'))
+
+        return render_template('registration.html', error=error)
     else:
         return render_template('registration.html')
 
@@ -128,10 +176,21 @@ def login():
     GET will display the login page. """
     if g.user:
         return redirect(url_for('home'))
+    # Check login info.
+    error = None
     if request.method == 'POST':
         # TODO Login logic.
-    else:
-        return render_template('login.html')
+        error = ''
+        pwd_hash = from_settings('pwd_hash')
+        if from_settings('username') != username:
+            error = 'Invalid username')
+        elif not check_password_hash(pwd_hash, password):
+            error = 'Invalid password')
+        else:
+            session['user_id'] = username
+            return redirect(url_for('home'))
+
+    return render_template('login.html', error=error)
 
 
 @app.route('/logout', methods=['GET', 'POST'])
@@ -150,13 +209,12 @@ def user_timeline(user_id):
     """ Shows the user's public timeline (their most
     recent posts). This is the only timeline view that
     an unauthenticated user can see. """
-    return render_template('public_timeline.html', messages=fu.fetch())
+    return render_template('public_timeline.html', messages=fu.fetch_top())
 
 
 @app.route('/<user_id>/<post_id>')
 def individual_post(post_id):
     """ Displays an individual post in it's own page. """
-    # TODO Add call to feedupdater for fetching individual posts.
     return render_template('individual_post.html', messages=fu.fetch(post_id))
 
 
