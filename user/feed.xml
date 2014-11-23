@@ -2,9 +2,9 @@
     <channel>
         <username>my_sample_username</username>
         <user_id>1234567890</user_id>
-        <user_full_name>Asample User</user_full_name>
-        <description><![CDATA[Hello. I do things.]]></description>
-        <link>127.0.0.1:5000</link>
+        <user_full_name>A. User</user_full_name>
+        <description><![CDATA[Coffee lover. Typical microblog bio writer. Techie. Foodie.]]></description>
+        <link>http://127.0.0.1:5000</link>
         <blocks count=""></blocks>
         <follows count=""></follows>
         <reply_to>
@@ -18,5 +18,25 @@
         <docs>http://example.com/docs</docs>
         <language>en</language>
         <lastBuildDate></lastBuildDate>
+        <item>
+        	<guid>4536u5453653</guid>
+        	<description><![CDATA[See mom! No hands!]]></description>
+        	<pubdate>Mon, Nov 22 2014</pubdate>
+		</item>
+        <item>
+        	<guid>eeher4345</guid>
+        	<description><![CDATA[Well, this is going well.]]></description>
+        	<pubdate>Mon, Nov 22 2014</pubdate>
+		</item>
+		<item>
+        	<guid>243423243</guid>
+        	<description><![CDATA[This system is pretty cool!]]></description>
+        	<pubdate>Mon, Nov 22 2014</pubdate>
+		</item>
+        <item>
+        	<guid>7656765</guid>
+        	<description><![CDATA[Hello World! My first post!]]></description>
+        	<pubdate>Mon, Nov 22 2014</pubdate>
+		</item>
     </channel>
 </rss>

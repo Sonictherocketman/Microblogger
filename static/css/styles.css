@@ -1,2 +1,127 @@
+/*
+ * Overall root styling
+ */
+ 
+ body {
+ 	font-family: 'Arial', sans-serif;
+ }
+ 
+ #content {
+ 	width:100%;
+ 	margin:0;
+ }
+ 
+ #posts-container {
+ 	margin-left:auto;
+ 	margin-right:auto;
+ 	width:50%;
+ 	max-width:400px;
+ }
+ 
+/* 
+ * Profile styling
+ */
+	
+  #profile {
+	border:1px solid black;
+ 	padding:3px;
+ 	margin-bottom:5px;
+  }
+  
+  #profile .username {
+	color:grey;
+	font-style: italic;
+	font-size: small;
+  }
+  
+  #profile .user_full_name {
+  
+  }
+  
+  #profile .bio {
+	 width:70%;
+  	 margin-left:auto;
+  	 margin-right:auto;
+  	 font-style:italic;
+  	 margin-top:5px;
+  	 padding:5px;
+  }
+ 
+/*
+ * Post list styling
+ */
+ 
+ #post-list {
+	margin-top:10px;
+ }
+ 
+ #post-list .post {
+ 	margin-top:5px;
+ 	border: 1px solid black; 
+ 	padding:3px;
+ }
+ 
+/*
+ * Post styling
+ */
+ 
+ .post .post-header {
+ 
+ }
+ 
+ .post .username {
+	color:grey;
+	font-style: italic;
+	font-size: small;
+ }
+ 
+ .post .user_full_name {
+
+ }
+ 
+ .post .text {
+ 	padding:5px;
+ }
+
+ .post .time {
+	color:grey;
+	font-style: italic;
+	font-size: small;
+ }
+
+/*
+ * Toolbar styling
+ */
+
+#reg-toolbar {
+	border:1px solid black;
+}
+
+#user-toolbar {
+
+}
+
+.toolbar .toolbar-items {
+	list-style: none;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.toolbar .toolbar-item {
+	display:inline;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+/* 
+ * Link styling
+ */ 
 
 
+/*
+ * Misc styling
+ */ 
+ .center {
+	margin-left:auto;
+	margin-right:auto;
+	width:90%;
+ }

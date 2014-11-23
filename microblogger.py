@@ -33,6 +33,7 @@ import json
 import re
 
 from feed import feedgenerator as fg, feedupdater as fu
+from crawler import feedreader as fr
 
 # Configuration
 DEBUG = True
@@ -98,7 +99,7 @@ def from_settings(key):
         with open(SETTINGS, 'r') as f:
             settings = json.loads(f.read())
             if key in settings.keys():
-                return cache[key]
+                return settings[key]
 
 
 def to_settings(key, value):
@@ -120,16 +121,20 @@ def before_request():
     g.user = None
     if 'user_id' in session:
         g.user = from_settings(session['user_id'])
-
+        print 'user_authenticated'
 
 @app.route('/')
 def home():
     """ Shows the user's timeline or if no user is logged in it
     will redirect to the user's public timeline (their most
     recent posts) for public viewing. """
-    if not g.user:
-        return redirect(url_for('user_timeline'))
-    return render_template('timeline.html', messages=fu.fetch())
+    posts = []
+    user = fr.get_user()
+    if g.user is None:
+        posts = fu.fetch_top()
+    else:
+        posts = fr.get_posts()
+    return render_template('timeline.html', posts=posts, user=user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -137,9 +142,11 @@ def register():
     """ POST Creates the new user. GET Displays the reg page."""
     if g.user:
         return redirect(url_for('home'))
+    elif from_settings('username') is not None:
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
-        error = None
+        error = ''
 
         username = request.form['username']
         password = request.form['password']
@@ -147,8 +154,7 @@ def register():
         email = request.form['email']
 
         if from_settings('username') is not None:
-            error = 'Only 1 user is allowed to register. Sign into, \
-                    or delete your old account.'
+            return redirect(url_for('login'))
         elif username is None:
             error = 'No username provided.'
         elif len(username) < 8 or len(username) > 25:
@@ -162,13 +168,14 @@ def register():
             error = 'You must fill in your password.'
         elif password != request.form['password_confirm']:
             error = 'Passwords do not match.'
-        elif len(password) < 8 or re.search('[a-zA-Z0-9]', password) is not None:
+        elif len(password) < 8 or re.search('[a-zA-Z0-9]', password) is None:
             error = 'Your password must be at least 8 characters long and \
                     must be a combination of numbers and letters. Special\
                     characters are allowed and encouraged.'
         else:
             to_settings('username', username)
             to_settings('pwd_hash', generate_password_hash(password))
+            session['user_id'] = username
             return redirect(url_for('home'))
 
         return render_template('registration.html', error=error)
@@ -183,10 +190,12 @@ def login():
     if g.user:
         return redirect(url_for('home'))
     # Check login info.
-    error = None
+    error = ''
     if request.method == 'POST':
         # TODO Login logic.
         error = ''
+        username = request.form['username']
+        password = request.form['password']
         pwd_hash = from_settings('pwd_hash')
         if from_settings('username') != username:
             error = 'Invalid username'
@@ -202,22 +211,11 @@ def login():
 def logout():
     """ POST will log the user out then takes them to the homepage.
     GET will display the logout page. """
-    if request.method == 'POST':
-        session.pop('user_id', None)
-        return redirect(url_for('home'))
-    else:
-        render_template('logout.html')
+    session.pop('user_id', None)
+    return redirect(url_for('home'))
 
 
-@app.route('/public')
-def user_timeline():
-    """ Shows the user's public timeline (their most
-    recent posts). This is the only timeline view that
-    an unauthenticated user can see. """
-    return render_template('public_timeline.html', messages=fu.fetch_top())
-
-
-@app.route('/<user_id>/<post_id>')
+@app.route('/<post_id>')
 def individual_post(post_id):
     """ Displays an individual post in it's own page. """
     return render_template('individual_post.html', messages=fu.fetch(post_id))
@@ -274,6 +272,10 @@ def api_user_timeline():
 if __name__ == '__main__':
     init_cache()
     init_settings()
+
+    # Create a secret key
+    to_settings('secret', os.urandom(64).encode('base-64'))
+    app.secret_key = from_settings('secret')
 
     # Startup
     app.run()

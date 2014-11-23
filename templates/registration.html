@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel='stylesheet' type='text/css' href='static/css/styles.css' />
+<script type='text/javascript' href='static/js/timeline.js'></script>
+{% endblock %}
+
+{% block title %}Register for an account{% endblock %}
+
+{% block profile %}
+<div class='header'>
+	<h1>Registration</h1>
+</div>
+<div class='error'>
+	<span>{{ error }}</span>
+</div>
+{% endblock %}
+
+{% block post_list %}
+<div class='sign-in-form'>
+	<form name='new-account-form' method='POST' action='/register'>
+		<table>
+			<tr>
+				<td>Username: </td>
+				<td><input type='text' name='username'/></td>
+			</tr>
+			<tr>
+				<td>Email: </td>
+				<td><input type='text' name='email'/></td>
+			</tr>
+			<tr>
+				<td>Password: </td>
+				<td><input type='text' name='password'/></td>
+			</tr>
+			<tr>
+				<td>Confirm your password: </td>
+				<td><input type='text' name='password_confirm'/></td>
+			</tr>
+			<tr>
+				<td>{# blank cell #}</td><td><input type='submit' value='Sign up' /></td>
+			</tr>
+		</table>
+	</form>
+</div>
+{% endblock %}

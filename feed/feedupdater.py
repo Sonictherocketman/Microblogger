@@ -6,7 +6,7 @@ from lxml.builder import E
 
 import time
 
-import post
+from post import post
 import util as u
 
 
@@ -25,7 +25,7 @@ def fetch(start, n=0):
 
     # Get the tree, exract the starting point.
     tree = u.get_user_feed('user/feed.xml')
-    stati = [post(status) for status in tree.xpath('/channel/item[@guid]')]
+    stati = [post(status) for status in tree.xpath('//channel/item[@guid]')]
 
     starting = stati.index([status for status in stati if status['guid'] == start][0])
 
@@ -47,7 +47,7 @@ def fetch_top(n=20):
         raise IndexError
 
     tree = u.get_user_feed('user/feed.xml')
-    stati = [post(status) for status in tree.xpath('/channel/item[@guid]')]
+    stati = [post(status) for status in tree.xpath('//item')]
     return stati[:n]
 
 

@@ -108,4 +108,4 @@ def standardize(data):
 def _recursive_dict(element):
     """ Converts an element to a recursive dict inside a tuple (tag, dict).
     From http://lxml.de/FAQ.html#how-can-i-map-an-xml-tree-into-a-dict-of-dicts """
-    return element.tag, dict(map(recursive_dict, element)) or element.text
+    return element.tag, dict(map(_recursive_dict, element)) or element.text

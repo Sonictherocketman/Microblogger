@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% block head %}
+	<title>{% block title %}{% endblock title %}</title>
+{% endblock head %}
+</head>
+<body>
+	<div id='content'>
+		<div id='posts-container'>
+			<div id='profile'>
+			{% block profile %}{% endblock profile %}
+			</div>
+			<div class='toolbar'>
+			{% if session['user_id'] is defined %}
+				{% include 'user_toolbar.html' %}
+			{% else %}
+				{% include 'reg_toolbar.html' %}
+			{% endif %}
+			</div>
+			<div id='post-list'>
+			{% block post_list %}{% endblock post_list %}			
+			</div>
+		</div>
+	</div>
+</body>
+</html>

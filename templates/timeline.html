@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel='stylesheet' type='text/css' href='static/css/styles.css' />
+<script type='text/javascript' href='static/js/timeline.js'></script>
+{% endblock %}
+
+{% block title %}This is the title{% endblock %}
+
+{% block profile %}
+<div class='user-info'>
+	<span class='user_full_name'>{{ user['user_full_name'] }}</span>
+	<span class='username'><a href='{{ user_link }}'>{{ user['username'] }}</a></span>
+</div>
+<div class='bio'>{{ user['bio'] }}</div>
+{% endblock %}
+
+{% block post_list %}
+	{# Add the posts to the list. #}
+	{% for post in posts %}
+		{% include 'post.html' %}
+	{% endfor %}
+{% endblock %}		
