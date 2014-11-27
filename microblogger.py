@@ -33,7 +33,7 @@ import json
 import re
 
 from feed import feedgenerator as fg, feedupdater as fu
-from crawler import feedreader as fr
+from crawler import feedreader as fr, crawler
 
 # Configuration
 DEBUG = True
@@ -83,7 +83,7 @@ def from_cache(key):
 
 
 def to_cache(key, value):
-    """ Adds a value to the settings file. """
+    """ Adds a value to the cache. """
     if os.path.isfile(CACHE):
         with open(CACHE, 'r+') as f:
                 current_settings = json.loads(f.read())
@@ -91,6 +91,13 @@ def to_cache(key, value):
                 f.seek(0)
                 f.write(json.dumps(current_settings))
                 f.truncate()
+
+
+def add_post_to_cache(post):
+    """ Adds a post to the cache. """
+    cached_posts = from_cache('posts')
+    cached_posts.append(post)
+    to_cahce('posts', cached_posts)
 
 
 def from_settings(key):
@@ -122,6 +129,7 @@ def before_request():
     if 'user_id' in session:
         g.user = from_settings(session['user_id'])
         print 'user_authenticated'
+
 
 @app.route('/')
 def home():
@@ -277,7 +285,9 @@ if __name__ == '__main__':
     to_settings('secret', os.urandom(64).encode('base-64'))
     app.secret_key = from_settings('secret')
 
-    # Startup
-    app.run()
+    # Start the crawler
+    crawler.crawl(callback=lambda post: add_post_to_cache(post))
 
+    # Start up the app
+    app.run()
 
