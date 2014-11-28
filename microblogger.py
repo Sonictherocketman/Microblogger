@@ -35,6 +35,8 @@ import re
 from feed import feedgenerator as fg, feedupdater as fu
 from crawler import feedreader as fr
 
+from datetime import datetime
+
 # Configuration
 DEBUG = True
 CACHE = '/tmp/microblogger_cache.json'
@@ -221,6 +223,19 @@ def individual_post(post_id):
     return render_template('individual_post.html', messages=fu.fetch(post_id))
 
 
+@app.route('/post', methods=['POST'])
+def add_post():
+    """ Adds a new post to the feed. """
+    if g.user:
+        print 'Inserting post'
+        fu.add_post({
+            'description': request.args['description'],
+            'pubdate': datetime.now(),
+            'guid': os.urandom(10).encode('base-64'),
+            'language': request.args['language'] or fr.get_user_language()
+          })
+    return redirect(url_for('home'))
+
 # REST APIs
 
 
@@ -247,6 +262,18 @@ def api_user_timeline():
     user_link = request.args.get('user_link')
     username = request.args.get('username')
     # TODO Get posts.
+
+
+@app.route('/api/post/add', methods=['POST'])
+def api_add_post():
+    """ Adds a new post to the user's feed. """
+    if g.user:
+        fu.add_post({
+            'description': request.args['description'],
+            'pubdate': now(),
+            'guid': os.urandom(10).encode('base-64'),
+            'language': request.args['language'] or fr.get_user_language()
+          })
 
 
 # TODO APIs

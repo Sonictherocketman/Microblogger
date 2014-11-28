@@ -125,3 +125,7 @@
 	margin-right:auto;
 	width:90%;
  }
+ 
+ .hidden {
+ 	visibility:hidden;
+ }

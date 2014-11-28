@@ -6,8 +6,12 @@ from lxml.builder import E
 
 def post(data):
     """ Convert an lxml 'item' element to a dict representation.  """
+    from dateutil.parser import parse
     item = _recursive_dict(data)
     if len(item) > 1:
+        item[1]['pubdate'] = parse(item[1]['pubdate'])
+        item[1]['pubdate_str'] = item[1]['pubdate'].strftime('%a, %d %b %Y %I:%M:%S')
+        print item[1]
         return item[1]
     else:
         raise MalformedDataError

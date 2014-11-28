@@ -20,23 +20,28 @@
         <lastBuildDate></lastBuildDate>
         <item>
         	<guid>4536u5453653</guid>
+        	<description><![CDATA[Yay! Date sorted posts!]]></description>
+        	<pubdate>Mon, Nov 22 2014 21:01:00</pubdate>
+		</item>
+        <item>
+        	<guid>4536u5453653</guid>
         	<description><![CDATA[See mom! No hands!]]></description>
-        	<pubdate>Mon, Nov 22 2014</pubdate>
+        	<pubdate>Mon, Nov 22 2014 13:01:00</pubdate>
 		</item>
         <item>
         	<guid>eeher4345</guid>
         	<description><![CDATA[Well, this is going well.]]></description>
-        	<pubdate>Mon, Nov 22 2014</pubdate>
+        	<pubdate>Mon, Nov 22 2014 10:00:00</pubdate>
 		</item>
 		<item>
         	<guid>243423243</guid>
         	<description><![CDATA[This system is pretty cool!]]></description>
-        	<pubdate>Mon, Nov 22 2014</pubdate>
+        	<pubdate>Mon, Nov 22 2014 10:30:00</pubdate>
 		</item>
         <item>
         	<guid>7656765</guid>
         	<description><![CDATA[Hello World! My first post!]]></description>
-        	<pubdate>Mon, Nov 22 2014</pubdate>
+        	<pubdate>Mon, Nov 22 2014 9:58:00</pubdate>
 		</item>
     </channel>
 </rss>
