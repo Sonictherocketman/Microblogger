@@ -8,6 +8,7 @@ from lxml import etree
 
 # User Feed Stuff
 
+
 def get_user_feed(rel_location):
     """ Get the etree representation of the feed located at the rel_location.  """
     tree = None
