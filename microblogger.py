@@ -22,6 +22,8 @@ The expected layout is:
 
 # TODO
 # - Add rate limiting.
+# - Reorganize the utilities methods to the util class.
+
 
 
 from flask import Flask, request, session, url_for, redirect,\
@@ -31,9 +33,12 @@ from werkzeug import check_password_hash, generate_password_hash
 import os
 import json
 import re
+from threading import Thread
 
 from feed import feedgenerator as fg, feedupdater as fu
-from crawler import feedreader as fr, crawler
+from crawler.crawler import MicroblogFeedCrawler
+from util import init_cache, init_settings, to_settings,\
+        from_settings, from_cache
 
 # Configuration
 DEBUG = True
@@ -45,79 +50,7 @@ ROOT_DIR = '/var/www/microblogger/'
 # Init the application
 app = Flask(__name__)
 app.config.from_object(__name__)
-
-
-# Admin and setup
-
-
-def init_cache():
-    """ Do the initial cache setup. This function
-    passes if a cache already exists. To clear it,
-    delete the cache file. """
-    if not os.path.isfile(CACHE):
-        cache = {}
-        with open(CACHE, 'w') as f:
-            f.write(json.dumps(cache))
-
-
-def init_settings():
-    """ Do the initial settings setup. This function
-    passes if a settings file already exists.
-
-    WARNING: Do not delete the settings file. There
-    will be no way for you to log into your account
-    once this file is deleted. """
-    if not os.path.isfile(SETTINGS):
-        settings = {}
-        with open(SETTINGS, 'w') as f:
-            f.write(json.dumps(settings))
-
-
-def from_cache(key):
-    """ Fetches a value from the cache. """
-    if os.path.isfile(CACHE):
-        with open(CACHE, 'r') as f:
-            cache = json.loads(f.read())
-            if key in cache.keys():
-                return cache[key]
-
-
-def to_cache(key, value):
-    """ Adds a value to the cache. """
-    if os.path.isfile(CACHE):
-        with open(CACHE, 'r+') as f:
-                current_settings = json.loads(f.read())
-                current_settings[key] = value
-                f.seek(0)
-                f.write(json.dumps(current_settings))
-                f.truncate()
-
-
-def add_post_to_cache(post):
-    """ Adds a post to the cache. """
-    cached_posts = from_cache('posts')
-    cached_posts.append(post)
-    to_cahce('posts', cached_posts)
-
-
-def from_settings(key):
-    """ Fetches a value from the settings. """
-    if os.path.isfile(SETTINGS):
-        with open(SETTINGS, 'r') as f:
-            settings = json.loads(f.read())
-            if key in settings.keys():
-                return settings[key]
-
-
-def to_settings(key, value):
-    """ Adds a value to the settings file. """
-    if os.path.isfile(SETTINGS):
-        with open(SETTINGS, 'r+') as f:
-                current_settings = json.loads(f.read())
-                current_settings[key] = value
-                f.seek(0)
-                f.write(json.dumps(current_settings))
-                f.truncate()
+crawler = MicroblogFeedCrawler()
 
 
 # Site pages
@@ -127,7 +60,7 @@ def to_settings(key, value):
 def before_request():
     g.user = None
     if 'user_id' in session:
-        g.user = from_settings(session['user_id'])
+        g.user = from_settings(SETTINGS, session['user_id'])
         print 'user_authenticated'
 
 
@@ -150,7 +83,7 @@ def register():
     """ POST Creates the new user. GET Displays the reg page."""
     if g.user:
         return redirect(url_for('home'))
-    elif from_settings('username') is not None:
+    elif from_settings(SETTINGS, 'username') is not None:
         return redirect(url_for('login'))
 
     if request.method == 'POST':
@@ -181,8 +114,8 @@ def register():
                     must be a combination of numbers and letters. Special\
                     characters are allowed and encouraged.'
         else:
-            to_settings('username', username)
-            to_settings('pwd_hash', generate_password_hash(password))
+            to_settings(SETTINGS, 'username', username)
+            to_settings(SETTINGS, 'pwd_hash', generate_password_hash(password))
             session['user_id'] = username
             return redirect(url_for('home'))
 
@@ -204,8 +137,8 @@ def login():
         error = ''
         username = request.form['username']
         password = request.form['password']
-        pwd_hash = from_settings('pwd_hash')
-        if from_settings('username') != username:
+        pwd_hash = from_settings(SETTINGS, 'pwd_hash')
+        if from_settings(SETTINGS, 'username') != username:
             error = 'Invalid username'
         elif not check_password_hash(pwd_hash, password):
             error = 'Invalid password'
@@ -278,15 +211,17 @@ def api_user_timeline():
 
 
 if __name__ == '__main__':
-    init_cache()
-    init_settings()
+    init_cache(CACHE)
+    init_settings(SETTINGS)
 
     # Create a secret key
-    to_settings('secret', os.urandom(64).encode('base-64'))
-    app.secret_key = from_settings('secret')
+    to_settings(SETTINGS, 'secret', os.urandom(64).encode('base-64'))
+    app.secret_key = from_settings(SETTINGS, 'secret')
 
-    # Start the crawler
-    crawler.crawl(callback=lambda post: add_post_to_cache(post))
+    # Start the crawler on another thread.
+    crawler_task = Thread(target=crawer.start, name='crawler')
+    crawler_task.setDaemon(True)
+    crawler_task.start()
 
     # Start up the app
     app.run()
