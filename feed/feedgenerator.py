@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Creates the base user feed.  """
+""" Creates the base user feed, and sets the initial values. """
 
 import post
 import util as u

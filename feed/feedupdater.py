@@ -18,39 +18,6 @@ def add_post(new_post):
     u.write_user_feed(tree, 'user/feed.xml')
 
 
-def fetch(start, n=0):
-    """ Starting at the starting post id, fetches n posts (assuming the posts are ordered).
-    Positive n for posts since start, negative n for previous posts.
-    Zero (or nothing) for only the post with the given id. """
-
-    # Get the tree, exract the starting point.
-    tree = u.get_user_feed('user/feed.xml')
-    stati = [post(status) for status in tree.xpath('//channel/item[@guid]')]
-
-    starting = stati.index([status for status in stati if status['guid'] == start][0])
-
-    # Get only the single post.
-    if n == 0:
-        return starting
-    # Get n posts.
-    if len(stati[starting:]) < abs(n):
-        if n > 0:
-            return stati[:starting]
-        if n < 0:
-            return stati[starting:]
-    return stati[starting:n]
-
-
-def fetch_top(n=20):
-    """ Fetches the n most recent posts in reverse chronological order.  """
-    if n < 0:
-        raise IndexError
-
-    tree = u.get_user_feed('user/feed.xml')
-    stati = [post(status) for status in tree.xpath('//item')]
-    return stati[:n]
-
-
 def delete_post(status_id):
     """ Deletes the post with the given id from the feed.  """
     tree = u.get_user_feed('user/feed.xml')
