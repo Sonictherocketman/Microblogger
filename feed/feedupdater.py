@@ -6,16 +6,17 @@ from lxml.builder import E
 
 import time
 
-from post import post
+from post import post, to_element
 import util as u
 
 
 def add_post(new_post):
     """ Adds the given post to the user's feed. """
-    tree = _get_user_feed('user/feed.xml')
+    tree = u.get_user_feed('user/feed.xml')
     channel = tree.xpath('//channel')
-    print 'Inserting'
-    channel.insert(0, post.to_element(new_post))
+    print 'Inserting {0}'.format(to_element(new_post))
+    # TODO: Inserting into the channel element does not insert into the tree.
+    channel.insert(0, to_element(new_post))
     u.write_user_feed(tree, 'user/feed.xml')
 
 

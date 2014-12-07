@@ -4,6 +4,7 @@
 from lxml import etree
 
 import util as u
+import post
 
 
 # User Functions
@@ -52,10 +53,72 @@ def get_user():
     return user
 
 
+def get_user_language():
+    """ Gets the user's chosen default language. """
+    feed = u.get_user_feed('user/feed.xml')
+    return feed.xpath('//channel/language')[0].text
+
 # Follows/Blocks Functions
 
 
-# TODO
+def get_user_follows():
+    """ Get the list of the people the user follows.
+    {
+    'username': ,
+    'user_id': ,
+    'user_link':
+    }
+    """
+    feed = u.get_user_feed('user/follows.xml')
+    follows = []
+    follows_el = feed.xpath('//channel/item')
+    if not len(follows_el) > 0:
+        return list()
+
+    for user_el in follows_el:
+        user = post._recursive_dict(user_el)[1]
+        follows.append({
+            'user_name': user['user_name'],
+            'user_id': user['user_id'],
+            'user_link': user['user_link']
+            })
+    return follows
+
+
+def get_user_follows_links():
+    """ Gets the list of links to the feeds the user follows.
+    Basically a simplified version of get_user_follows. """
+    return [user['user_link'] for user in get_user_follows()]
+
+
+def get_user_blocks():
+    """ Get the list of the people the user follows.
+    {
+    'username': ,
+    'user_id': ,
+    'user_link':
+    }
+    """
+    feed = u.get_user_feed('user/blocks.xml')
+    blocks = []
+    blocks_el = feed.xpath('//channel/item')
+    if not len(blocks_el) > 0:
+        return list()
+
+    for user_el in blocks_el:
+        user = post._recursive_dict(user_el)[1]
+        blocks.append({
+            'user_name': user['user_name'],
+            'user_id': user['user_id'],
+            'user_link': user['user_link']
+            })
+    return blocks
+
+
+def get_user_blocks_links():
+    """ Gets the list of links to the feeds the user follows.
+    Basically a simplified version of get_user_follows. """
+    return [user['user_link'] for user in get_user_blocks()]
 
 
 # Status Functions
@@ -92,5 +155,6 @@ def fetch_top(n=20):
     tree = u.get_user_feed('user/feed.xml')
     stati = [post(status) for status in tree.xpath('//item')]
     return stati[:n]
+
 
 

@@ -3,44 +3,44 @@
         <username>my_sample_username</username>
         <user_id>1234567890</user_id>
         <user_full_name>A. User</user_full_name>
-        <description><![CDATA[Coffee lover. Typical microblog bio writer. Techie. Foodie.]]></description>
+        <description>Coffee lover. Typical microblog bio writer. Techie. Foodie.</description>
         <link>http://127.0.0.1:5000</link>
-        <blocks count=""></blocks>
-        <follows count=""></follows>
+        <blocks count=""/>
+        <follows count=""/>
         <reply_to>
             <link>http://service.tld/reply</link>
             <reply_to_user_id>sample_userid</reply_to_user_id>
-            <reply_to_status_id />
-            <reply_from_user_id />
-            <reply_status_id />
-            <user_link />
+            <reply_to_status_id/>
+            <reply_from_user_id/>
+            <reply_status_id/>
+            <user_link/>
         </reply_to>
         <docs>http://example.com/docs</docs>
         <language>en</language>
-        <lastBuildDate></lastBuildDate>
+        <lastBuildDate/>
         <item>
         	<guid>4536u5453653</guid>
-        	<description><![CDATA[Yay! Date sorted posts!]]></description>
+        	<description>Yay! Date sorted posts!</description>
         	<pubdate>Mon, Nov 22 2014 21:01:00</pubdate>
 		</item>
         <item>
         	<guid>4536u5453653</guid>
-        	<description><![CDATA[See mom! No hands!]]></description>
+        	<description>See mom! No hands!</description>
         	<pubdate>Mon, Nov 22 2014 13:01:00</pubdate>
 		</item>
         <item>
         	<guid>eeher4345</guid>
-        	<description><![CDATA[Well, this is going well.]]></description>
+        	<description>Well, this is going well.</description>
         	<pubdate>Mon, Nov 22 2014 10:00:00</pubdate>
 		</item>
 		<item>
         	<guid>243423243</guid>
-        	<description><![CDATA[This system is pretty cool!]]></description>
+        	<description>This system is pretty cool!</description>
         	<pubdate>Mon, Nov 22 2014 10:30:00</pubdate>
 		</item>
         <item>
         	<guid>7656765</guid>
-        	<description><![CDATA[Hello World! My first post!]]></description>
+        	<description>Hello World! My first post!</description>
         	<pubdate>Mon, Nov 22 2014 9:58:00</pubdate>
 		</item>
     </channel>

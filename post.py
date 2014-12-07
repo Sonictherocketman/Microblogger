@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """ A Python wrapper for the XML item elements.  """
 
-from lxml.etree import Element
+from lxml.etree import Element, CDATA
 from lxml.builder import E
+
+
+DATE_STR_FORMAT = '%a, %d %b %Y %I:%M:%S'
+
 
 def post(data):
     """ Convert an lxml 'item' element to a dict representation.  """
@@ -10,30 +14,29 @@ def post(data):
     item = _recursive_dict(data)
     if len(item) > 1:
         item[1]['pubdate'] = parse(item[1]['pubdate'])
-        item[1]['pubdate_str'] = item[1]['pubdate'].strftime('%a, %d %b %Y %I:%M:%S')
-        print item[1]
+        item[1]['pubdate_str'] = item[1]['pubdate'].strftime(DATE_STR_FORMAT)
         return item[1]
     else:
-        raise MalformedDataError
+        raise ValueError
 
 
 def to_element(data):
     """ Covert dict to lxml element. Only standard elements are inserted. If the
-    post does not meet standards, raises MalformedDataError.
+    post does not meet standards, raises ValueError.
     See http://openmicroblog.com for information about the standard elements."""
     try:
         data = standardize(data)
-    except MalformedDataError:
+    except ValueError:
         print 'The post data provided does not meet Open Microblog standards. \n\
                 Please see http://openmicroblog.com for information on required elements.'
-        raise MalformedDataError
+        raise ValueError
 
     # Check if the post is a reply.
-    if data['is_reply']:
+    if 'is_reply' in data.keys():
         return E.item(
                 # General Info
                 E.guid(data['guid']),
-                E.pubDate(data['pubDate']),
+                E.pubDate(data['pubdate'].strftime(DATE_STR_FORMAT)),
                 E.description(CDATA(data['description'])),
                 E.language(data['language']),
                 # Replying
@@ -43,16 +46,16 @@ def to_element(data):
                 )
 
     # Check if the post is a repost.
-    elif data['is_repost']:
+    elif 'is_repost' in data.keys():
         return E.item(
                 # General Info
                 E.guid(data['guid']),
-                E.pubDate(data['pubDate']),
+                E.pubDate(data['pubdate'].strftime(DATE_STR_FORMAT)),
                 E.description(CDATA(data['description'])),
                 E.language(data['language']),
                 # Reposting
                 E.reposted_status_id(data['reposted_status_id']),
-                E.reposted_status_pubdate(data['reposted_status_pubdate']),
+                E.reposted_status_pubdate(data['reposted_status_pubdate'].strftime(DATE_STR_FORMAT)),
                 E.reposted_status_user_id(data['reposted_status_user_id']),
                 E.reposted_status_user_link(data['reposted_status_user_link'])
                 )
@@ -62,7 +65,7 @@ def to_element(data):
         return E.item(
                 # General Info
                 E.guid(data['guid']),
-                E.pubDate(data['pubDate']),
+                E.pubDate(data['pubdate'].strftime(DATE_STR_FORMAT)),
                 E.description(CDATA(data['description'])),
                 E.language(data['language'])
                 )
@@ -71,34 +74,34 @@ def to_element(data):
 def standardize(data):
     """ Checks the post and adds some metadata and appends any missing
     information with the defaults. If the post does not meet standards,
-    raises MalformedDataError """
+    raises ValueError """
 
     # Check for normal post information.
     if 'guid' not in data.keys():
-        raise MalformedDataError
-    if 'pubDate' not in data.keys():
-        raise MalformedDataError
+        raise ValueError
+    if 'pubdate' not in data.keys():
+        raise ValueError
     if 'description' not in data.keys():
-        raise MalformedDataError
+        raise ValueError
 
    # Check if its a repost. Make sure required info is present.
     if 'reposted_status_id' in data.keys():
         if 'reposted_status_pubdate' not in data.keys():
-            raise MalformedDataError
+            raise ValueError
         if 'reposted_status_user_id' not in data.keys():
-            raise MalformedDataError
+            raise ValueError
         if 'reposted_status_user_id' not in data.keys():
-            raise MalformedDataError
+            raise ValueError
         if 'reposted_status_user_link' not in data.keys():
-            raise MalformedDataError
+            raise ValueError
         data['is_repost'] = True
 
    # Check if its a reply. Make sure required info is present.
     elif 'in_reply_to_status_id' in data.keys():
         if 'in_reply_to_user_id' not in data.keys():
-            raise MalformedDataError
+            raise ValueError
         if 'in_reply_to_user_link' not in data.keys():
-            raise MalformedDataError
+            raise ValueError
         data['is_reply'] = True
 
     # Check for missing optional information.

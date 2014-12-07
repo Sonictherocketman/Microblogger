@@ -2,6 +2,8 @@
 """ Utilities for doing basic feed file IO.  """
 
 from lxml import etree
+import os
+import json
 
 # TODO
 # - Add pagination support for reading and writing.

@@ -31,20 +31,23 @@ from flask import Flask, request, session, url_for, redirect,\
 from werkzeug import check_password_hash, generate_password_hash
 
 import os
-import json
 import re
 from threading import Thread
 
-from feed import feedgenerator as fg, feedupdater as fu
+from feed import feedgenerator as fg,\
+        feedreader as fr, \
+        feedupdater as fu
 from crawler.crawler import MicroblogFeedCrawler
 from util import init_cache, init_settings, to_settings,\
         from_settings, from_cache
 
 from datetime import datetime
 
+
 # Configuration
 DEBUG = True
 CACHE = '/tmp/microblogger_cache.json'
+# TODO Remove this file from the tmp dir since IT IS TEMPORARY!
 SETTINGS = '/tmp/microblogger_settings.json'
 ROOT_DIR = '/var/www/microblogger/'
 
@@ -52,7 +55,7 @@ ROOT_DIR = '/var/www/microblogger/'
 # Init the application
 app = Flask(__name__)
 app.config.from_object(__name__)
-crawler = MicroblogFeedCrawler()
+crawler = MicroblogFeedCrawler(fr.get_user_follows_links())
 
 
 # Site pages
@@ -96,7 +99,7 @@ def register():
         password_confirm = request.form['password_confirm']
         email = request.form['email']
 
-        if from_settings('username') is not None:
+        if from_settings(SETTINGS, 'username') is not None:
             return redirect(url_for('login'))
         elif username is None:
             error = 'No username provided.'
@@ -135,7 +138,6 @@ def login():
     # Check login info.
     error = ''
     if request.method == 'POST':
-        # TODO Login logic.
         error = ''
         username = request.form['username']
         password = request.form['password']
@@ -158,7 +160,7 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route('/<post_id>')
+@app.route('/status/<post_id>')
 def individual_post(post_id):
     """ Displays an individual post in it's own page. """
     return render_template('individual_post.html', messages=fu.fetch(post_id))
@@ -167,15 +169,20 @@ def individual_post(post_id):
 @app.route('/post', methods=['POST'])
 def add_post():
     """ Adds a new post to the feed. """
-    if g.user:
-        print 'Inserting post'
-        fu.add_post({
-            'description': request.args['description'],
-            'pubdate': datetime.now(),
-            'guid': os.urandom(10).encode('base-64'),
-            'language': request.args['language'] or fr.get_user_language()
-          })
+    if 'user_id' not in session:
+        abort(401)
+
+    print 'Inserting post'
+    print request.form['post-text']
+    fu.add_post({
+        'description': request.form['post-text'],
+        'pubdate': datetime.now(),
+        'guid': os.urandom(10).encode('base-64'),
+        'language': fr.get_user_language()
+    })
+    print 'inserted'
     return redirect(url_for('home'))
+
 
 # REST APIs
 
@@ -205,7 +212,7 @@ def api_user_timeline():
     # TODO Get posts.
 
 
-@app.route('/api/post/add', methods=['POST'])
+@app.route('/api/status/add', methods=['POST'])
 def api_add_post():
     """ Adds a new post to the user's feed. """
     if g.user:
@@ -233,7 +240,6 @@ def api_add_post():
 # - PROBABLY NOT IN v1: Get list of follows who follow you (friends)
 
 
-
 # Main
 
 
@@ -246,7 +252,7 @@ if __name__ == '__main__':
     app.secret_key = from_settings(SETTINGS, 'secret')
 
     # Start the crawler on another thread.
-    crawler_task = Thread(target=crawer.start, name='crawler')
+    crawler_task = Thread(target=crawler.start, name='crawler')
     crawler_task.setDaemon(True)
     crawler_task.start()
 

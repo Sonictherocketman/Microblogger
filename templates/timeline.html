@@ -27,10 +27,10 @@
 <input id='new-post-template-is-shown' type='hidden' value='false'/>
 <div id='new-post-template' class='hidden'>
 	<div class='post post-template'>
-		<form action='/post' method='POST'>
+		<form action='{{ url_for('add_post') }}' method='POST'>
 			<div class='post-content'>
 				<div class='text center'>
-					<textarea rows="3" cols="50" maxLength="200" id='post-text'></textarea>
+					<input rows="3" cols="50" maxLength="200" name='post-text'/>
 				</div>
 				<input type='submit' value='Post' />
 			</div>
