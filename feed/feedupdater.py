@@ -13,10 +13,8 @@ import util as u
 def add_post(new_post):
     """ Adds the given post to the user's feed. """
     tree = u.get_user_feed('user/feed.xml')
-    channel = tree.xpath('//channel')
-    print 'Inserting {0}'.format(to_element(new_post))
-    # TODO: Inserting into the channel element does not insert into the tree.
-    channel.insert(0, to_element(new_post))
+    channel = tree.xpath('//channel')[0]
+    channel.append(to_element(new_post))
     u.write_user_feed(tree, 'user/feed.xml')
 
 

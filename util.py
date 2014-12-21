@@ -22,7 +22,7 @@ def get_user_feed(rel_location):
 def write_user_feed(tree, rel_location):
     """ Write the etree representation of the feed to the rel_locaiton.  """
     with open(rel_location, 'w') as f:
-        tree.write(f)
+        tree.write(f, pretty_print=True)
 
 
 # Cache and Settings Init

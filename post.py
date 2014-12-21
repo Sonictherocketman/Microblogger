@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ A Python wrapper for the XML item elements.  """
 
-from lxml.etree import Element, CDATA
+from lxml.etree import Element
 from lxml.builder import E
 
 
@@ -36,8 +36,8 @@ def to_element(data):
         return E.item(
                 # General Info
                 E.guid(data['guid']),
-                E.pubDate(data['pubdate'].strftime(DATE_STR_FORMAT)),
-                E.description(CDATA(data['description'])),
+                E.pubdate(data['pubdate'].strftime(DATE_STR_FORMAT)),
+                E.description(data['description']),
                 E.language(data['language']),
                 # Replying
                 E.in_reply_to_status_id(data['in_reply_to_status_id']),
@@ -50,8 +50,8 @@ def to_element(data):
         return E.item(
                 # General Info
                 E.guid(data['guid']),
-                E.pubDate(data['pubdate'].strftime(DATE_STR_FORMAT)),
-                E.description(CDATA(data['description'])),
+                E.pubdate(data['pubdate'].strftime(DATE_STR_FORMAT)),
+                E.description(data['description']),
                 E.language(data['language']),
                 # Reposting
                 E.reposted_status_id(data['reposted_status_id']),
@@ -65,8 +65,8 @@ def to_element(data):
         return E.item(
                 # General Info
                 E.guid(data['guid']),
-                E.pubDate(data['pubdate'].strftime(DATE_STR_FORMAT)),
-                E.description(CDATA(data['description'])),
+                E.pubdate(data['pubdate'].strftime(DATE_STR_FORMAT)),
+                E.description(data['description']),
                 E.language(data['language'])
                 )
 

@@ -23,14 +23,14 @@ The expected layout is:
 # TODO
 # - Add rate limiting.
 # - Reorganize the utilities methods to the util class.
-
-
+# - Maybe consider extending the on_demand crawler to be dynamic in number.
 
 from flask import Flask, request, session, url_for, redirect,\
     render_template, abort, g
 from werkzeug import check_password_hash, generate_password_hash
 
 import os
+import uuid
 import re
 from threading import Thread
 
@@ -55,8 +55,8 @@ ROOT_DIR = '/var/www/microblogger/'
 # Init the application
 app = Flask(__name__)
 app.config.from_object(__name__)
-crawler = MicroblogFeedCrawler(fr.get_user_follows_links())
-
+main_crawler = MicroblogFeedCrawler(fr.get_user_follows_links())
+on_demand_crawler = MicroblogFeedCrawler([])
 
 # Site pages
 
@@ -177,7 +177,7 @@ def add_post():
     fu.add_post({
         'description': request.form['post-text'],
         'pubdate': datetime.now(),
-        'guid': os.urandom(10).encode('base-64'),
+        'guid': str(uuid.uuid4().int),
         'language': fr.get_user_language()
     })
     print 'inserted'
@@ -251,10 +251,15 @@ if __name__ == '__main__':
     to_settings(SETTINGS, 'secret', os.urandom(64).encode('base-64'))
     app.secret_key = from_settings(SETTINGS, 'secret')
 
-    # Start the crawler on another thread.
-    crawler_task = Thread(target=crawler.start, name='crawler')
-    crawler_task.setDaemon(True)
-    crawler_task.start()
+    # Start the 2 crawlers on other threads.
+    main_crawler_task = Thread(target=main_crawler.start, name='main_crawler')
+    on_demand_crawler_task = Thread(target=on_demand_crawler.start, name='on_demand_cawler')
+
+    main_crawler_task.setDaemon(True)
+    on_demand_crawler_task.setDaemon(True)
+
+    main_crawler_task.start()
+    on_demand_crawler_task.start()
 
     # Start up the app
     app.run()
