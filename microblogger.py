@@ -37,7 +37,7 @@ from threading import Thread
 from feed import feedgenerator as fg,\
         feedreader as fr, \
         feedupdater as fu
-from crawler.crawler import MicroblogFeedCrawler
+from crawler.crawler import MicroblogFeedCrawler, CallbackCrawler
 from util import init_cache, init_settings, to_settings,\
         from_settings, from_cache
 
@@ -56,7 +56,8 @@ ROOT_DIR = '/var/www/microblogger/'
 app = Flask(__name__)
 app.config.from_object(__name__)
 main_crawler = MicroblogFeedCrawler(fr.get_user_follows_links())
-on_demand_crawler = MicroblogFeedCrawler([])
+on_demand_crawler = CallbackCrawler()
+
 
 # Site pages
 
@@ -172,16 +173,52 @@ def add_post():
     if 'user_id' not in session:
         abort(401)
 
-    print 'Inserting post'
-    print request.form['post-text']
     fu.add_post({
         'description': request.form['post-text'],
         'pubdate': datetime.now(),
         'guid': str(uuid.uuid4().int),
         'language': fr.get_user_language()
     })
-    print 'inserted'
     return redirect(url_for('home'))
+
+
+@app.route('/user/<user_id>/', methods=['GET'])
+def get_user_profile(user_id):
+    """ Get the profile of the given user."""
+    # TODO
+    posts = []
+    if user_id == fr.get_user_id():
+        posts = fr.fetch_top()
+    else:
+        user_link = [u['user_link'] for u in fr.get_user_follows()
+                if u['user_id'] == user_id]
+
+        # Go get the posts for that given user.
+        data = on_demand_crawler.get_all_items(user_link)
+        info = data[user_link[0]]['info']
+        items = data[user_link[0]]['items']
+        user = {
+                'username': info['user_name'],
+                'user_id': info['user_id'],
+                'user_link': info['user_link'],
+                'bio': info['description'],
+                'user_full_name': info['user_full_name']
+                }
+        posts = []
+        for item in items:
+            posts.append({
+                'description': item['description'],
+                'puddate_str': item['pubdate_str']
+                })
+
+        return render_template('timeline.html', user=user, posts=posts)
+
+
+@app.route('/user/<user_id>/<status_id>', methods=['GET'])
+def get_status_by_user(user_id, status_id):
+    """ Get a given status by a given user. """
+    # TODO
+    pass
 
 
 # REST APIs
@@ -253,13 +290,8 @@ if __name__ == '__main__':
 
     # Start the 2 crawlers on other threads.
     main_crawler_task = Thread(target=main_crawler.start, name='main_crawler')
-    on_demand_crawler_task = Thread(target=on_demand_crawler.start, name='on_demand_cawler')
-
     main_crawler_task.setDaemon(True)
-    on_demand_crawler_task.setDaemon(True)
-
     main_crawler_task.start()
-    on_demand_crawler_task.start()
 
     # Start up the app
     app.run()
