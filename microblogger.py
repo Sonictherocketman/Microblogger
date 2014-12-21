@@ -24,6 +24,7 @@ The expected layout is:
 # - Add rate limiting.
 # - Reorganize the utilities methods to the util class.
 # - Maybe consider extending the on_demand crawler to be dynamic in number.
+# - Add character limits to add_post.
 
 from flask import Flask, request, session, url_for, redirect,\
     render_template, abort, g
@@ -262,7 +263,7 @@ def get_status_by_user(user_id, status_id):
 
 
 # REST APIs
-
+# TODO: Break these out into their own Flask bundle.
 
 @app.route('/api/timeline/home_timeline', methods=['GET'])
 def api_home_timeline():
