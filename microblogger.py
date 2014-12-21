@@ -48,7 +48,7 @@ from datetime import datetime
 DEBUG = True
 CACHE = '/tmp/microblogger_cache.json'
 # TODO Remove this file from the tmp dir since IT IS TEMPORARY!
-SETTINGS = '/tmp/microblogger_settings.json'
+SETTINGS = os.path.expanduser('~/.microblogger_settings.json')
 ROOT_DIR = '/var/www/microblogger/'
 
 
@@ -185,7 +185,7 @@ def add_post():
 @app.route('/user/<user_id>/', methods=['GET'])
 def get_user_profile(user_id):
     """ Get the profile of the given user."""
-    # TODO
+    # TODO: Test this...
     posts = []
     if user_id == fr.get_user_id():
         posts = fr.fetch_top()
@@ -217,7 +217,7 @@ def get_user_profile(user_id):
 @app.route('/status/<user_id>/<status_id>', methods=['GET'])
 def get_status_by_user(user_id, status_id):
     """ Get a given status by a given user. """
-    # TODO
+    # TODO: Test this...
     user = None
     post = None
     if user_id == fr.get_user_id():
