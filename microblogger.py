@@ -25,6 +25,7 @@ The expected layout is:
 # - Reorganize the utilities methods to the util class.
 # - Maybe consider extending the on_demand crawler to be dynamic in number.
 # - Add character limits to add_post.
+# - Make the default logged in page be the user's timeline.
 
 from flask import Flask, request, session, url_for, redirect,\
     render_template, abort, g
@@ -79,7 +80,7 @@ def home():
     posts = []
     user = fr.get_user()
     if g.user is None:
-        posts = fu.fetch_top()
+        posts = fr.fetch_top()
     else:
         posts = fr.get_posts()
     return render_template('timeline.html', posts=posts, user=user)
@@ -187,8 +188,10 @@ def add_post():
 def get_user_profile(user_id):
     """ Get the profile of the given user."""
     # TODO: Test this...
+    user = None
     posts = []
-    if user_id == fr.get_user_id():
+    if not g.user or user_id == fr.get_user_id():
+        user = fr.get_user()
         posts = fr.fetch_top()
     else:
         user_link = [u['user_link'] for u in fr.get_user_follows()
@@ -212,7 +215,7 @@ def get_user_profile(user_id):
                 'puddate_str': item['pubdate_str']
                 })
 
-        return render_template('timeline.html', user=user, posts=posts)
+    return render_template('timeline.html', user=user, posts=posts)
 
 
 @app.route('/status/<user_id>/<status_id>', methods=['GET'])
@@ -221,7 +224,7 @@ def get_status_by_user(user_id, status_id):
     # TODO: Test this...
     user = None
     post = None
-    if user_id == fr.get_user_id():
+    if not g.user or user_id == fr.get_user_id():
         user = fr.get_user()
         post = fr.fetch(status_id)
     else:

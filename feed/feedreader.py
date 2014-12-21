@@ -131,7 +131,8 @@ def fetch(start, n=0):
 
     # Get the tree, exract the starting point.
     tree = u.get_user_feed('user/feed.xml')
-    stati = [post(status) for status in tree.xpath('//channel/item[@guid]')]
+    stati = [post.post(status) for status in tree.xpath('//channel/item')]
+    stati.sort(key=lambda x: x['pubdate'], reverse=True)
 
     starting = stati.index([status for status in stati if status['guid'] == start][0])
 
@@ -153,7 +154,8 @@ def fetch_top(n=20):
         raise IndexError
 
     tree = u.get_user_feed('user/feed.xml')
-    stati = [post(status) for status in tree.xpath('//item')]
+    stati = [post.post(status) for status in tree.xpath('//item')]
+    stati.sort(key=lambda x: x['pubdate'], reverse=True)
     return stati[:n]
 
 
