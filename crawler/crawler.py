@@ -39,7 +39,7 @@ class MicroblogFeedCrawler(FeedCrawler):
         pass
 
 
-class CallbackCrawler(FeedCrawler):
+class OnDemandCrawler(FeedCrawler):
     """ A crawler that returns the data for each
     feed once the entire set of links is parsed.
 
@@ -57,8 +57,9 @@ class CallbackCrawler(FeedCrawler):
         self._data = {}
         FeedCrawler.__init__(self, [], start_now=False, deep_traverse=False)
 
-    def get_all_items(self, links):
+    def get_all_items(self, links, deep_traverse=False):
         """ Does the crawling and returns when the crawling is done. """
+        self._deep_traverse = deep_traverse
         self.start(links)
         return self._data
 

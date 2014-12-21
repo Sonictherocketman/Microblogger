@@ -37,7 +37,7 @@ from threading import Thread
 from feed import feedgenerator as fg,\
         feedreader as fr, \
         feedupdater as fu
-from crawler.crawler import MicroblogFeedCrawler, CallbackCrawler
+from crawler.crawler import MicroblogFeedCrawler, OnDemandCrawler
 from util import init_cache, init_settings, to_settings,\
         from_settings, from_cache
 
@@ -56,7 +56,7 @@ ROOT_DIR = '/var/www/microblogger/'
 app = Flask(__name__)
 app.config.from_object(__name__)
 main_crawler = MicroblogFeedCrawler(fr.get_user_follows_links())
-on_demand_crawler = CallbackCrawler()
+on_demand_crawler = OnDemandCrawler()
 
 
 # Site pages
@@ -164,7 +164,7 @@ def logout():
 @app.route('/status/<post_id>')
 def individual_post(post_id):
     """ Displays an individual post in it's own page. """
-    return render_template('individual_post.html', messages=fu.fetch(post_id))
+    return render_template('individual_post.html', post=fr.fetch(post_id))
 
 
 @app.route('/post', methods=['POST'])
@@ -214,11 +214,51 @@ def get_user_profile(user_id):
         return render_template('timeline.html', user=user, posts=posts)
 
 
-@app.route('/user/<user_id>/<status_id>', methods=['GET'])
+@app.route('/status/<user_id>/<status_id>', methods=['GET'])
 def get_status_by_user(user_id, status_id):
     """ Get a given status by a given user. """
     # TODO
-    pass
+    user = None
+    post = None
+    if user_id == fr.get_user_id():
+        user = fr.get_user()
+        post = fr.fetch(status_id)
+    else:
+        user_link = [u['user_link'] for u in fr.get_user_follows()
+                if u['user_id'] == user_id]
+
+        # Go get the posts for that given user.
+        data = on_demand_crawler.get_all_items(user_link)
+        info = data[user_link[0]]['info']
+        items = data[user_link[0]]['items']
+        user = {
+                'username': info['user_name'],
+                'user_id': info['user_id'],
+                'user_link': info['user_link'],
+                'bio': info['description'],
+                'user_full_name': info['user_full_name']
+                }
+
+        def find_and_package_item(items):
+            """ Go over the list of items and package them for display. """
+            # Try to find the one post needed.
+            for item in items:
+                if item['guid'] == status_id:
+                    return {
+                        'description': item['description'],
+                        'puddate_str': item['pubdate_str']
+                        }
+            return None
+
+        post = find_and_package_item(items)
+
+        # If not found, then search their whole feed.
+        if post is None:
+            data = on_demand_crawler.get_all_items(user_link)
+            items = data[user_link[0]]['items']
+            post = find_and_package_items(items)
+
+    return render_template('individual_post.html', user=user, post=post)
 
 
 # REST APIs
