@@ -22,10 +22,8 @@ The expected layout is:
 
 # TODO
 # - Add rate limiting.
-# - Reorganize the utilities methods to the util class.
-# - Maybe consider extending the on_demand crawler to be dynamic in number.
 # - Add character limits to add_post.
-# - Make the default logged in page be the user's timeline.
+# - Fix crawler backgrounding. It seems to go crazy on its own.
 
 from flask import Flask, request, session, url_for, redirect,\
     render_template, abort, g
@@ -41,7 +39,7 @@ from feed import feedgenerator as fg,\
         feedupdater as fu
 from crawler.crawler import MicroblogFeedCrawler, OnDemandCrawler
 from util import init_cache, init_settings, to_settings,\
-        from_settings, from_cache
+        from_settings, from_cache, to_cache
 
 from datetime import datetime
 
@@ -57,19 +55,11 @@ ROOT_DIR = '/var/www/microblogger/'
 # Init the application
 app = Flask(__name__)
 app.config.from_object(__name__)
-main_crawler = MicroblogFeedCrawler(fr.get_user_follows_links())
-on_demand_crawler = OnDemandCrawler()
+main_crawler = None
+on_demand_crawler = None
 
 
 # Site pages
-
-
-@app.before_request
-def before_request():
-    g.user = None
-    if 'user_id' in session:
-        g.user = from_settings(SETTINGS, session['user_id'])
-        print 'user_authenticated'
 
 
 @app.route('/')
@@ -79,17 +69,17 @@ def home():
     recent posts) for public viewing. """
     posts = []
     user = fr.get_user()
-    if g.user is None:
-        posts = fr.fetch_top()
+    if 'user_id' in session:
+        posts = from_cache(CACHE, 'posts')
     else:
-        posts = fr.get_posts()
+        posts = fr.fetch_top()
     return render_template('timeline.html', posts=posts, user=user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """ POST Creates the new user. GET Displays the reg page."""
-    if g.user:
+    if 'user_id' in session:
         return redirect(url_for('home'))
     elif from_settings(SETTINGS, 'username') is not None:
         return redirect(url_for('login'))
@@ -136,7 +126,7 @@ def register():
 def login():
     """ POST will log the user in then take them to their timeline.
     GET will display the login page. """
-    if g.user:
+    if 'user_id' in session:
         return redirect(url_for('home'))
     # Check login info.
     error = ''
@@ -163,6 +153,13 @@ def logout():
     return redirect(url_for('home'))
 
 
+@app.route('/feed')
+def feed():
+    """ This just returns the user's XML feed. """
+    with open('user/feed.xml') as f:
+        return f.read()
+
+
 @app.route('/status/<post_id>')
 def individual_post(post_id):
     """ Displays an individual post in it's own page. """
@@ -174,6 +171,9 @@ def add_post():
     """ Adds a new post to the feed. """
     if 'user_id' not in session:
         abort(401)
+
+    if len(request.form['post-text']) > 200:
+        return redirect(url_for('home', error='Too many characters'))
 
     fu.add_post({
         'description': request.form['post-text'],
@@ -190,7 +190,9 @@ def get_user_profile(user_id):
     # TODO: Test this...
     user = None
     posts = []
-    if not g.user or user_id == fr.get_user_id():
+    if 'user_id' not in session:
+        return redirect(url_for('home', error='Please log in to view other\'s profiles.'))
+    elif user_id == fr.get_user_id():
         user = fr.get_user()
         posts = fr.fetch_top()
     else:
@@ -224,7 +226,10 @@ def get_status_by_user(user_id, status_id):
     # TODO: Test this...
     user = None
     post = None
-    if not g.user or user_id == fr.get_user_id():
+
+    if 'user_id' not in session:
+        return redirect(url_for('home', error='Please log in to view other\'s profiles.'))
+    elif user_id == fr.get_user_id():
         user = fr.get_user()
         post = fr.fetch(status_id)
     else:
@@ -296,7 +301,7 @@ def api_user_timeline():
 @app.route('/api/status/add', methods=['POST'])
 def api_add_post():
     """ Adds a new post to the user's feed. """
-    if g.user:
+    if 'user_id' in session:
         fu.add_post({
             'description': request.args['description'],
             'pubdate': now(),
@@ -328,13 +333,23 @@ if __name__ == '__main__':
     init_cache(CACHE)
     init_settings(SETTINGS)
 
-    # Create a secret key
+    to_settings(SETTINGS, 'cache_location', CACHE)
+
+    # Add some basic stuff to the cache.
+    follows = fr.get_user_follows_links()
+    follows.append(fr.get_user_link())
+    to_cache(CACHE, 'follows', follows)
+
+    # Make the crawlers.
+    main_crawler = MicroblogFeedCrawler(follows)
+    on_demand_crawler = OnDemandCrawler()
+
+    # Create a secret key.
     to_settings(SETTINGS, 'secret', os.urandom(64).encode('base-64'))
     app.secret_key = from_settings(SETTINGS, 'secret')
 
     # Start the 2 crawlers on other threads.
     main_crawler_task = Thread(target=main_crawler.start, name='main_crawler')
-    main_crawler_task.setDaemon(True)
     main_crawler_task.start()
 
     # Start up the app

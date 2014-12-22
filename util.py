@@ -33,7 +33,9 @@ def init_cache(cache):
     passes if a cache already exists. To clear it,
     delete the cache file. """
     if not os.path.isfile(cache):
-        cache_data = {}
+        cache_data = {
+                'posts': []
+                }
         with open(cache, 'w') as f:
             f.write(json.dumps(cache_data))
 

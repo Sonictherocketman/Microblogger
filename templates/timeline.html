@@ -10,7 +10,7 @@
 {% block profile %}
 <div class='user-info'>
 	<span class='user_full_name'>{{ user['user_full_name'] }}</span>
-	<span class='username'><a href='{{ user_link }}'>{{ user['username'] }}</a></span>
+	<span class='username'><a href='/user/{{ user["user_id"] }}'>{{ user['username'] }}</a></span>
 </div>
 <div class='bio'>{{ user['bio'] }}</div>
 {% endblock %}

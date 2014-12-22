@@ -15,7 +15,7 @@ class MicroblogFeedCrawler(FeedCrawler):
         # not show their messages or replies.
         self.block_list = []
         self.ignore_user = False
-
+        self.user_info = []
         FeedCrawler.__init__(self, links, start_now=start_now, deep_traverse=deep_traverse)
 
     def on_start(self):
@@ -28,15 +28,13 @@ class MicroblogFeedCrawler(FeedCrawler):
         # TODO
         pass
 
-    def on_info(self, info):
+    def on_info(self, link, info):
         """ Handle the new info for a feed. """
-        # TODO
         pass
 
-    def on_item(self, item):
+    def on_item(self, link, item):
         """ Store new items in the cache. """
-        # TODO
-        pass
+        add_post_to_cache(item, '/tmp/microblogger_cache.json')
 
 
 class OnDemandCrawler(FeedCrawler):
