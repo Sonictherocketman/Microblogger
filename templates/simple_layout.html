@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% block head %}
+	<title>{% block title %}{% endblock title %}</title>
+{% endblock head %}
+</head>
+<body>
+	<div id='content'>
+		<div id='posts-container'>
+			<div id='post-list'>
+			{% block post_list %}{% endblock post_list %}			
+			</div>
+		</div>
+	</div>
+	{% block footer %}{% endblock %}
+</body>
+</html>

@@ -22,8 +22,11 @@ The expected layout is:
 
 # TODO
 # - Add rate limiting.
-# - Add character limits to add_post.
-# - Fix crawler backgrounding. It seems to go crazy on its own.
+# - Fix cache. Nothing is being added to it, nor is it in order. It might
+#   just be better to have a cache manager instead of all this settings, cache BS.
+# - Add settings to external file so that they can be modified and accessed seperately
+# - Clean up the logic for the get_status/get_post funcs.
+# - Memoize the fr.
 
 
 from flask import Flask, request, session, url_for, redirect,\
@@ -185,15 +188,8 @@ def follows():
 # Status and Profile Handlers
 
 
-# Use get_status_by_user
-#@app.route('/status/<post_id>')
-#def individual_post(post_id):
-#    """ Displays an individual post in it's own page. """
-#    return render_template('individual_post.html', post=fr.fetch(post_id))
-
-
 @app.route('/new_status', methods=['POST'])
-def add_post():
+def add_status():
     """ Adds a new post to the feed. """
     if 'user_id' not in session:
         abort(401)
@@ -261,7 +257,7 @@ def get_status_by_user(user_id, status_id):
         user = fr.get_user()
         post = fr.fetch(status_id)
     else:
-        'other user'
+        print 'other user'
         user_link = [u['user_link'] for u in fr.get_user_follows()
                 if u['user_id'] == user_id]
 
