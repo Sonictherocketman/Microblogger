@@ -34,7 +34,8 @@ def init_cache(cache):
     delete the cache file. """
     if not os.path.isfile(cache):
         cache_data = {
-                'posts': []
+                'timeline': [],
+                'users': []
                 }
         with open(cache, 'w') as f:
             f.write(json.dumps(cache_data))
@@ -75,13 +76,6 @@ def to_cache(cache, key, value):
                 f.write(json.dumps(current_cache))
                 f.truncate()
 
-
-def add_post_to_cache(post, cache):
-    """ Adds a post to the cache. """
-    cached_posts = from_cache(cache, 'posts')
-    cached_posts.append(post)
-    to_cache(cache, 'posts', cached_posts)
-    print cached_posts
 
 # Settings Methods
 
