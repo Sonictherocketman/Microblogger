@@ -25,6 +25,7 @@ The expected layout is:
 # - Add character limits to add_post.
 # - Fix crawler backgrounding. It seems to go crazy on its own.
 
+
 from flask import Flask, request, session, url_for, redirect,\
     render_template, abort, g
 from werkzeug import check_password_hash, generate_password_hash
@@ -49,7 +50,6 @@ import sys
 # Configuration
 DEBUG = True
 CACHE = '/tmp/microblogger_cache.json'
-# TODO Remove this file from the tmp dir since IT IS TEMPORARY!
 SETTINGS = os.path.expanduser('~/.microblogger_settings.json')
 ROOT_DIR = '/var/www/microblogger/'
 
@@ -76,6 +76,9 @@ def home():
     else:
         posts = fr.fetch_top()
     return render_template('timeline.html', posts=posts, user=user)
+
+
+# Login/Registration
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -155,6 +158,9 @@ def logout():
     return redirect(url_for('home'))
 
 
+# XML File Getters
+
+
 @app.route('/feed')
 def feed():
     """ This just returns the user's XML feed. """
@@ -162,13 +168,31 @@ def feed():
         return f.read()
 
 
-@app.route('/status/<post_id>')
-def individual_post(post_id):
-    """ Displays an individual post in it's own page. """
-    return render_template('individual_post.html', post=fr.fetch(post_id))
+@app.route('/blocks')
+def blocks():
+    """ Returns the user's block list. """
+    with open('user/blocks.xml') as f:
+        return f.read()
 
 
-@app.route('/post', methods=['POST'])
+@app.route('/follows')
+def follows():
+    """ Returns the user's block list. """
+    with open('user/follows.xml') as f:
+        return f.read()
+
+
+# Status and Profile Handlers
+
+
+# Use get_status_by_user
+#@app.route('/status/<post_id>')
+#def individual_post(post_id):
+#    """ Displays an individual post in it's own page. """
+#    return render_template('individual_post.html', post=fr.fetch(post_id))
+
+
+@app.route('/new_status', methods=['POST'])
 def add_post():
     """ Adds a new post to the feed. """
     if 'user_id' not in session:
@@ -177,12 +201,13 @@ def add_post():
     if len(request.form['post-text']) > 200:
         return redirect(url_for('home', error='Too many characters'))
 
-    fu.add_post({
+    post = {
         'description': request.form['post-text'],
         'pubdate': datetime.now(),
         'guid': str(uuid.uuid4().int),
         'language': fr.get_user_language()
-    })
+    }
+    fr.add_post(post)
     return redirect(url_for('home'))
 
 
@@ -232,9 +257,11 @@ def get_status_by_user(user_id, status_id):
     if 'user_id' not in session:
         return redirect(url_for('home', error='Please log in to view other\'s profiles.'))
     elif user_id == fr.get_user_id():
+        print 'home user id'
         user = fr.get_user()
         post = fr.fetch(status_id)
     else:
+        'other user'
         user_link = [u['user_link'] for u in fr.get_user_follows()
                 if u['user_id'] == user_id]
 
@@ -274,6 +301,7 @@ def get_status_by_user(user_id, status_id):
 
 # REST APIs
 # TODO: Break these out into their own Flask bundle.
+
 
 @app.route('/api/timeline/home_timeline', methods=['GET'])
 def api_home_timeline():

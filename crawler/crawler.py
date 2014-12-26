@@ -1,9 +1,10 @@
 """ A FeedCrawler subclass """
 
 from microblogcrawler.crawler import FeedCrawler
-from util import to_cache, add_post_to_cache
+from util import to_cache, add_post_to_cache, from_settings
 from feed.feedreader import get_user_follows_links, get_user_blocks_links
 from post import post
+import time
 
 
 class MicroblogFeedCrawler(FeedCrawler):
@@ -21,12 +22,12 @@ class MicroblogFeedCrawler(FeedCrawler):
     def on_start(self):
         """ Refresh the follows list and the blocks list. """
         self.block_list = get_user_blocks_links()
-        return get_user_follows_links()
+        links = get_user_follows_links()
+        return links
 
     def on_finish(self):
         """ Handle end of crawling process. """
-        # TODO
-        pass
+        time.sleep(2)
 
     def on_info(self, link, info):
         """ Handle the new info for a feed. """
@@ -35,7 +36,7 @@ class MicroblogFeedCrawler(FeedCrawler):
     def on_item(self, link, item):
         """ Store new items in the cache. """
         print 'New item'
-        add_post_to_cache(item, '/tmp/microblogger_cache.json')
+        add_post_to_cache(item, from_settings('~/.microblogger_settings.json', 'cache_location'))
 
 
 class OnDemandCrawler(FeedCrawler):
