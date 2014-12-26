@@ -43,6 +43,8 @@ from util import init_cache, init_settings, to_settings,\
 
 from datetime import datetime
 
+import signal
+import sys
 
 # Configuration
 DEBUG = True
@@ -326,10 +328,34 @@ def api_add_post():
 # - PROBABLY NOT IN v1: Get list of follows who follow you (friends)
 
 
+# Shutdown
+
+
+def shutdown_server():
+    """ Handles the app server shutdown.
+    From: http://flask.pocoo.org/snippets/67/ """
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+
+def signal_handler(signal, frame):
+    """ Gracefuly shuts down the server when CNTL-C is pressed. """
+    print 'Shutting down...'
+    main_crawler.stop()
+    on_demand_crawler.stop()
+    # shutdown_server()
+    print 'Goodbye :)'
+    sys.exit(0)
+
+
 # Main
 
 
 if __name__ == '__main__':
+    # Get everything going.
+    signal.signal(signal.SIGINT, signal_handler)
     init_cache(CACHE)
     init_settings(SETTINGS)
 
@@ -348,7 +374,7 @@ if __name__ == '__main__':
     to_settings(SETTINGS, 'secret', os.urandom(64).encode('base-64'))
     app.secret_key = from_settings(SETTINGS, 'secret')
 
-    # Start the 2 crawlers on other threads.
+    # Start the crawler on another thread.
     main_crawler_task = Thread(target=main_crawler.start, name='main_crawler')
     main_crawler_task.start()
 

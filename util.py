@@ -81,7 +81,7 @@ def add_post_to_cache(post, cache):
     cached_posts = from_cache(cache, 'posts')
     cached_posts.append(post)
     to_cache(cache, 'posts', cached_posts)
-
+    print cached_posts
 
 # Settings Methods
 

@@ -34,6 +34,7 @@ class MicroblogFeedCrawler(FeedCrawler):
 
     def on_item(self, link, item):
         """ Store new items in the cache. """
+        print 'New item'
         add_post_to_cache(item, '/tmp/microblogger_cache.json')
 
 
