@@ -8,6 +8,7 @@ import json
 # TODO
 # - Add pagination support for reading and writing.
 
+
 # User Feed Stuff
 
 
@@ -26,19 +27,6 @@ def write_user_feed(tree, rel_location):
 
 
 # Cache and Settings Init
-
-
-def init_cache(cache):
-    """ Do the initial cache setup. This function
-    passes if a cache already exists. To clear it,
-    delete the cache file. """
-    if not os.path.isfile(cache):
-        cache_data = {
-                'timeline': [],
-                'users': []
-                }
-        with open(cache, 'w') as f:
-            f.write(json.dumps(cache_data))
 
 
 def init_settings(settings):

@@ -42,9 +42,9 @@ from feed import feedgenerator as fg,\
         feedreader as fr, \
         feedupdater as fu
 from crawler.crawler import MicroblogFeedCrawler, OnDemandCrawler
-from util import init_cache, init_settings, to_settings,\
-        from_settings, from_cache, to_cache
-
+from util import init_settings, to_settings,\
+        from_settings
+from cachemanager import CacheManager
 from datetime import datetime
 
 import signal
@@ -62,7 +62,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 main_crawler = None
 on_demand_crawler = None
-
+cache_manager = None
 
 # Site pages
 
