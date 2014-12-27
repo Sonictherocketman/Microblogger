@@ -23,13 +23,11 @@ class MicroblogFeedCrawler(FeedCrawler):
 
     def on_start(self):
         """ Refresh the follows list and the blocks list. """
-        self.block_list = get_user_blocks_links()
-        links = get_user_follows_links()
-        return links
+        time.sleep(1)
 
     def on_finish(self):
         """ Handle end of crawling process. """
-        time.sleep(2)
+        pass
 
     def on_info(self, link, info):
         """ Handle the new info for a feed. """
@@ -37,7 +35,6 @@ class MicroblogFeedCrawler(FeedCrawler):
 
     def on_item(self, link, item):
         """ Store new items in the cache. """
-        print 'New item'
         CacheManager.add_to_timeline(item)
 
 
@@ -76,7 +73,7 @@ class OnDemandCrawler(FeedCrawler):
                     'items': [],
                     'info': []
                     }
-        self._data[link]['items'].append(post(item))
+        self._data[link]['items'].append(item)
 
     def on_info(self, link, item):
         """ Add the info field to the link's dict. """

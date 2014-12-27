@@ -13,8 +13,7 @@ def post(data):
     from dateutil.parser import parse
     item = _recursive_dict(data)
     if len(item) > 1:
-        item[1]['pubdate'] = parse(item[1]['pubdate'])
-        item[1]['pubdate_str'] = item[1]['pubdate'].strftime(DATE_STR_FORMAT)
+        item[1]['pubdate'] = parse(item[1]['pubdate']).strftime(DATE_STR_FORMAT)
         return item[1]
     else:
         raise ValueError

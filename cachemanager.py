@@ -12,8 +12,8 @@ problem.
 """
 
 
-import os
-from util import init_cache, to_cache, from_cache
+import os, json
+from util import to_cache, from_cache
 
 
 class CacheManager():
@@ -45,11 +45,11 @@ class CacheManager():
         exists, then it clears it. """
 
         # Make sure everything is in order.
-        if not os.path.isfile(location)
+        if os.path.isfile(location):
             print 'Cache location must be a directory not a file.'
             raise IOError
         if not os.path.isdir(location):
-            os.mkdirs(location)
+            os.mkdir(location)
 
         # Set the cache file location.
         CacheManager.cache_location = location
@@ -83,7 +83,7 @@ class CacheManager():
     def get_timeline():
         """ Retrieves the main user's cached timeline.
         In reverse chronological order. """
-        return from_cache(CacheManager.cache_location, 'timeline')
+        return from_cache(CacheManager.cache_file_location, 'timeline')
 
     @staticmethod
     def add_to_timeline(new_status):
@@ -93,8 +93,11 @@ class CacheManager():
         timeline = CacheManager.get_timeline()
         index = [timeline.index(status) for status in timeline \
                 if status['pubdate'] < new_status['pubdate']]
-        if index is not None:
-            timeline.insert(index, new_status)
+        if len(index) == 0:
+            timeline.insert(0, new_status)
+        else:
+            timeline.insert(index[0], new_status)
+
         if len(timeline) > 1000:
             timeline = timeline[0:999]
         to_cache(CacheManager.cache_file_location, 'timeline', timeline)

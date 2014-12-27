@@ -30,13 +30,13 @@ The expected layout is:
 
 
 from flask import Flask, request, session, url_for, redirect,\
-    render_template, abort, g
+    render_template, abort
 from werkzeug import check_password_hash, generate_password_hash
 
 import os
 import uuid
 import re
-from threading import Thread
+from threading import Thread, enumerate, current_thread
 
 from feed import feedgenerator as fg,\
         feedreader as fr, \
@@ -197,13 +197,12 @@ def add_status():
     if len(request.form['post-text']) > 200:
         return redirect(url_for('home', error='Too many characters'))
 
-    post = {
+    fu.add_post({
         'description': request.form['post-text'],
         'pubdate': datetime.now(),
         'guid': str(uuid.uuid4().int),
         'language': fr.get_user_language()
-    }
-    fr.add_post(post)
+    })
     return redirect(url_for('home'))
 
 
@@ -355,23 +354,22 @@ def api_add_post():
 # Shutdown
 
 
-def shutdown_server():
-    """ Handles the app server shutdown.
-    From: http://flask.pocoo.org/snippets/67/ """
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
-
 def signal_handler(signal, frame):
     """ Gracefuly shuts down the server when CNTL-C is pressed. """
-    print 'Shutting down...'
-    main_crawler.stop()
-    on_demand_crawler.stop()
-    # shutdown_server()
-    print 'Goodbye :)'
+    if not signal_handler.already_called:
+        signal_handler.already_called = True
+        main_crawler.stop()
+        on_demand_crawler.stop()
+        # Wait for all threads to stop.
+        for thread in enumerate():
+            if thread != current_thread():
+                try:
+                    thread.join()
+                except AssertionError:
+                    print 'Error closing thread.'
     sys.exit(0)
+# This is a static variable inside th sig_handle function.
+signal_handler.already_called = False
 
 
 # Main
@@ -383,6 +381,9 @@ if __name__ == '__main__':
     CacheManager.create_cache(CACHE)
     init_settings(SETTINGS)
 
+    follows = fr.get_user_follows()
+    follows.append(fr.get_user_link())
+
     # Make the crawlers.
     main_crawler = MicroblogFeedCrawler(follows)
     on_demand_crawler = OnDemandCrawler()
@@ -393,6 +394,7 @@ if __name__ == '__main__':
 
     # Start the crawler on another thread.
     main_crawler_task = Thread(target=main_crawler.start, name='main_crawler')
+    main_crawler_task.setDaemon(True)
     main_crawler_task.start()
 
     # Start up the app
