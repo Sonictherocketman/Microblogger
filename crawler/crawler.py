@@ -1,9 +1,11 @@
 """ A FeedCrawler subclass """
 
 from microblogcrawler.crawler import FeedCrawler
-from util import to_cache, add_post_to_cache, from_settings
+from util import from_settings
 from feed.feedreader import get_user_follows_links, get_user_blocks_links
 from post import post
+from cachemanager import CacheManager
+
 import time
 
 
@@ -36,7 +38,7 @@ class MicroblogFeedCrawler(FeedCrawler):
     def on_item(self, link, item):
         """ Store new items in the cache. """
         print 'New item'
-        add_post_to_cache(item, from_settings('~/.microblogger_settings.json', 'cache_location'))
+        CacheManager.add_to_timeline(item)
 
 
 class OnDemandCrawler(FeedCrawler):

@@ -52,7 +52,7 @@ import sys
 
 # Configuration
 DEBUG = True
-CACHE = '/tmp/microblogger_cache.json'
+CACHE = '/tmp/microblog/'
 SETTINGS = os.path.expanduser('~/.microblogger_settings.json')
 ROOT_DIR = '/var/www/microblogger/'
 
@@ -62,7 +62,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 main_crawler = None
 on_demand_crawler = None
-cache_manager = None
+
 
 # Site pages
 
@@ -75,7 +75,7 @@ def home():
     posts = []
     user = fr.get_user()
     if 'user_id' in session:
-        posts = from_cache(CACHE, 'posts')
+        posts = CacheManager.get_timeline()
     else:
         posts = fr.fetch_top()
     return render_template('timeline.html', posts=posts, user=user)
@@ -380,15 +380,8 @@ def signal_handler(signal, frame):
 if __name__ == '__main__':
     # Get everything going.
     signal.signal(signal.SIGINT, signal_handler)
-    init_cache(CACHE)
+    CacheManager.create_cache(CACHE)
     init_settings(SETTINGS)
-
-    to_settings(SETTINGS, 'cache_location', CACHE)
-
-    # Add some basic stuff to the cache.
-    follows = fr.get_user_follows_links()
-    follows.append(fr.get_user_link())
-    to_cache(CACHE, 'follows', follows)
 
     # Make the crawlers.
     main_crawler = MicroblogFeedCrawler(follows)
