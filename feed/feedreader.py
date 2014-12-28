@@ -2,6 +2,7 @@
 """ Reads values from the user's feed. """
 
 from lxml import etree
+from dateutil.parser import parse
 
 import util as u
 import post
@@ -132,7 +133,7 @@ def fetch(start, n=0):
     # Get the tree, exract the starting point.
     tree = u.get_user_feed('user/feed.xml')
     stati = [post.post(status) for status in tree.xpath('//channel/item')]
-    stati.sort(key=lambda x: x['pubdate'], reverse=True)
+    stati.sort(key=lambda x: parse(x['pubdate']), reverse=True)
 
     starting = stati.index([status for status in stati if status['guid'] == start][0])
 
@@ -140,6 +141,7 @@ def fetch(start, n=0):
     if n == 0:
         return starting
     # Get n posts.
+    # TODO: This doensnt work....
     if len(stati[starting:]) < abs(n):
         if n > 0:
             return stati[:starting]
@@ -155,7 +157,7 @@ def fetch_top(n=20):
 
     tree = u.get_user_feed('user/feed.xml')
     stati = [post.post(status) for status in tree.xpath('//item')]
-    stati.sort(key=lambda x: x['pubdate'], reverse=True)
+    stati.sort(key=lambda x: parse(x['pubdate']), reverse=True)
     return stati[:n]
 
 

@@ -37,6 +37,8 @@ import os
 import uuid
 import re
 from threading import Thread, enumerate, current_thread
+import signal
+import sys
 
 from feed import feedgenerator as fg,\
         feedreader as fr, \
@@ -46,9 +48,6 @@ from util import init_settings, to_settings,\
         from_settings
 from cachemanager import CacheManager
 from datetime import datetime
-
-import signal
-import sys
 
 # Configuration
 DEBUG = True

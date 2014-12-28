@@ -5,7 +5,7 @@ from lxml.etree import Element
 from lxml.builder import E
 
 
-DATE_STR_FORMAT = '%a, %d %b %Y %I:%M:%S'
+DATE_STR_FORMAT = '%a, %d %b %Y %H:%M:%S'
 
 
 def post(data):
