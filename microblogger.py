@@ -22,8 +22,6 @@ The expected layout is:
 
 # TODO
 # - Add rate limiting.
-# - Fix cache. Nothing is being added to it, nor is it in order. It might
-#   just be better to have a cache manager instead of all this settings, cache BS.
 # - Add settings to external file so that they can be modified and accessed seperately
 # - Clean up the logic for the get_status/get_post funcs.
 # - Memoize the fr.
@@ -58,7 +56,6 @@ ROOT_DIR = '/var/www/microblogger/'
 
 # Init the application
 app = Flask(__name__)
-app.config.from_object(__name__)
 main_crawler = None
 on_demand_crawler = None
 
@@ -119,6 +116,10 @@ def register():
                     must be a combination of numbers and letters. Special\
                     characters are allowed and encouraged.'
         else:
+            # Update the feed.
+            fu.set_username(username)
+
+            # Update the settings.
             to_settings(SETTINGS, 'username', username)
             to_settings(SETTINGS, 'pwd_hash', generate_password_hash(password))
             session['user_id'] = username
@@ -393,7 +394,7 @@ if __name__ == '__main__':
 
     # Start the crawler on another thread.
     main_crawler_task = Thread(target=main_crawler.start, name='main_crawler')
-    main_crawler_task.setDaemon(True)
+    main_crawler_task.daemon = True
     main_crawler_task.start()
 
     # Start up the app

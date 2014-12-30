@@ -23,7 +23,7 @@ class MicroblogFeedCrawler(FeedCrawler):
 
     def on_start(self):
         """ Refresh the follows list and the blocks list. """
-        time.sleep(1)
+        print self._links
 
     def on_finish(self):
         """ Handle end of crawling process. """

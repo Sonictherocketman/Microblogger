@@ -14,6 +14,7 @@ problem.
 
 import os, json
 from util import to_cache, from_cache
+from dateutil.parser import parse
 
 
 class CacheManager():
@@ -92,7 +93,7 @@ class CacheManager():
         chronologically. """
         timeline = CacheManager.get_timeline()
         index = [timeline.index(status) for status in timeline \
-                if status['pubdate'] < new_status['pubdate']]
+                if parse(status['pubdate']) < parse(new_status['pubdate'])]
         if len(index) == 0:
             timeline.insert(0, new_status)
         else:

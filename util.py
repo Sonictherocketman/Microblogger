@@ -61,7 +61,9 @@ def to_cache(cache, key, value):
                 current_cache = json.loads(f.read())
                 current_cache[key] = value
                 f.seek(0)
-                f.write(json.dumps(current_cache))
+                f.write(json.dumps(current_cache,
+                    sort_keys=True,
+                    indent=4))
                 f.truncate()
 
 
