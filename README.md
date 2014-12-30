@@ -2,7 +2,7 @@
 
 *IN DEV: See issues*
 
-A basic microblogging service implementing the [Open Microblog][1] standard. It is intended to be a base implementation of the standard; a proof of concept for the standard.
+A basic microblogging service implementing the [Open Microblog][1] standard. It is intended to be a base implementation of the standard, a proof of concept.
 
 [1]: https://github.com/Sonictherocketman/Open-Microblog
 
