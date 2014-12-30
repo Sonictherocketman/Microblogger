@@ -49,6 +49,7 @@ DEBUG = True
 CACHE = '/tmp/microblog/'
 SETTINGS = os.path.expanduser('~/.microblogger_settings.json')
 ROOT_DIR = '/var/www/microblogger/'
+DEFAULT_TIMELINE_SIZE = 25
 
 
 # Init the application
@@ -379,6 +380,8 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     CacheManager.create_cache(CACHE)
     init_settings(SETTINGS)
+
+    to_settings(SETTINGS, 'default_timeline_size', DEFAULT_TIMELINE_SIZE)
 
     follows = fr.get_user_follows()
     follows.append(fr.get_user_link())

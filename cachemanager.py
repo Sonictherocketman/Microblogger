@@ -81,10 +81,35 @@ class CacheManager():
     # Main User's Timeline Functions
 
     @staticmethod
-    def get_timeline():
+    def get_timeline(start_id=None, n=0):
         """ Retrieves the main user's cached timeline.
         In reverse chronological order. """
-        return from_cache(CacheManager.cache_file_location, 'timeline')
+        full_timeline = from_cache(CacheManager.cache_file_location, 'timeline')
+
+        # By default, return the first 25 items.
+        if start_id is None:
+            return full_timeline[:25]
+
+        starting_item = [item for item in full_timeline if item['guid'] == starting_id]
+        index = 0
+        if len(starting_item) > 0:
+            index = full_timeline.index(starting_item)
+
+        # If no n is provided return max 25 items after the given one.
+        if n is None:
+            end = 25
+            if len(full_timeline[index:]) < 25:
+                end = len(full_timeline[index:])
+            return full_timeline[index:end]
+
+        # Return n items (forward or back) from the given point.
+        if n == 0:
+            return [full_timeline[index]]
+        elif n < 0:
+            full_timeline = reversed(full_timeline)
+
+        return full_timeline[:abs(n)]
+
 
     @staticmethod
     def add_to_timeline(new_status):
