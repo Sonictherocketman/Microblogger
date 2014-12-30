@@ -6,6 +6,8 @@ A basic microblogging service implementing the [Open Microblog][1] standard. It 
 
 [1]: https://github.com/Sonictherocketman/Open-Microblog
 
+**For detailed information, [see our new Wiki](https://github.com/Sonictherocketman/Microblogger/wiki)!**
+
 ## About Microblogger
 
 Short version: Its like Twitter, but you host your account on your own computer (preferably a server). You can talk to anyone else using Microblogger or any other person using [Open Microblog][1] compatable program. All your data is kept on your server and you have control over all of it.
