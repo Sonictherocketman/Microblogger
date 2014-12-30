@@ -158,6 +158,34 @@ def logout():
     return redirect(url_for('home'))
 
 
+@app.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    """ Allows the user to make changes to their profile. """
+    if 'user_id' not in session:
+        return redirect(url_for('home', error='Please log in to make changes.'))
+    elif request.method == 'GET':
+        return render_template('profile.html', user=fr.get_user())
+    else:
+        if request.form['change_full_name'] == 'True':
+            user_full_name = request.form['user_full_name']
+            fu.set_user_full_name(user_full_name)
+        if request.form['change_bio'] == 'True':
+            bio = request.form['bio']
+            fu.set_user_bio(bio)
+        if request.form['change_password'] == 'True':
+            password = request.form['password']
+            password_confirm = request.form['password_confirm']
+            if password == password_confirm:
+                SettingsManager.add(generate_password_hash(password))
+        if request.form['change_relocate'] == 'True':
+            relocate_url = request.form['relocate_url']
+            fu.relocate_user_feed(relocate_url)
+        if request.form['change_language'] == 'True':
+            language = request.form['language']
+            # TODO: Add language change function to fu.
+        return render_template('profile.html', error='Your settings have been saved.')
+
+
 # XML File Getters
 
 
