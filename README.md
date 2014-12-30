@@ -33,15 +33,6 @@ Microblogger is a single-user web-app that allows users to host their own microb
 
 ## Installing Microblogger
 
-Currently, the preferred way to install Microblogger is:
-
-    1. Clone the Git Repo, or download it as a zip
-    2. Extract the repo to '/var/www/' (UNIX systems only)
-    3. Make sure you have all the dependencies
-        - microblogcrawler
-        - Flask
-        - etc (Full list coming soon)
-        * All of the dependencies can be installed with pip
-    4. Open your favorite terminal and type `python microblogger.py`
+See the wiki page: [Installing/Running Microblogger](https://github.com/Sonictherocketman/Microblogger/wiki/Running-and-Installing-Microblogger) for complete instructions.
 
 Pull requests gladly accepted.
