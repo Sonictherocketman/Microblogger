@@ -26,22 +26,6 @@ def write_user_feed(tree, rel_location):
         tree.write(f, pretty_print=True)
 
 
-# Cache and Settings Init
-
-
-def init_settings(settings):
-    """ Do the initial settings setup. This function
-    passes if a settings file already exists.
-
-    WARNING: Do not delete the settings file. There
-    will be no way for you to log into your account
-    once this file is deleted. """
-    if not os.path.isfile(settings):
-        settings_data = {}
-        with open(settings, 'w') as f:
-            f.write(json.dumps(settings_data))
-
-
 # Cache Methods
 
 
@@ -86,7 +70,9 @@ def to_settings(settings, key, value):
                 current_settings = json.loads(f.read())
                 current_settings[key] = value
                 f.seek(0)
-                f.write(json.dumps(current_settings))
+                f.write(json.dumps(current_settings,
+                    sort_keys=True,
+                    indent=4))
                 f.truncate()
 
 

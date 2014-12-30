@@ -32,6 +32,7 @@ import os
 import uuid
 import re
 from threading import Thread, enumerate, current_thread
+from datetime import datetime
 import signal
 import sys
 
@@ -39,10 +40,9 @@ from feed import feedgenerator as fg,\
         feedreader as fr, \
         feedupdater as fu
 from crawler.crawler import MicroblogFeedCrawler, OnDemandCrawler
-from util import init_settings, to_settings,\
-        from_settings
 from cachemanager import CacheManager
-from datetime import datetime
+from settingsmanager import SettingsManager
+
 
 # Configuration
 DEBUG = True
@@ -56,7 +56,6 @@ DEFAULT_TIMELINE_SIZE = 25
 app = Flask(__name__)
 main_crawler = None
 on_demand_crawler = None
-
 
 # Site pages
 
@@ -83,7 +82,7 @@ def register():
     """ POST Creates the new user. GET Displays the reg page."""
     if 'user_id' in session:
         return redirect(url_for('home'))
-    elif from_settings(SETTINGS, 'username') is not None:
+    elif SettingsManager.get('username') is not None:
         return redirect(url_for('login'))
 
     if request.method == 'POST':
@@ -94,7 +93,7 @@ def register():
         password_confirm = request.form['password_confirm']
         email = request.form['email']
 
-        if from_settings(SETTINGS, 'username') is not None:
+        if SettingsManager.get('username') is not None:
             return redirect(url_for('login'))
         elif username is None:
             error = 'No username provided.'
@@ -115,11 +114,11 @@ def register():
                     characters are allowed and encouraged.'
         else:
             # Update the feed.
-            fu.set_username(username)
+            fg.set_username(username)
 
             # Update the settings.
-            to_settings(SETTINGS, 'username', username)
-            to_settings(SETTINGS, 'pwd_hash', generate_password_hash(password))
+            SettingsManager.add('username', username)
+            SettingsManager.add('pwd_hash', generate_password_hash(password))
             session['user_id'] = username
             return redirect(url_for('home'))
 
@@ -140,8 +139,8 @@ def login():
         error = ''
         username = request.form['username']
         password = request.form['password']
-        pwd_hash = from_settings(SETTINGS, 'pwd_hash')
-        if from_settings(SETTINGS, 'username') != username:
+        pwd_hash = SettingsManager.get('pwd_hash')
+        if SettingsManager.get('username') != username:
             error = 'Invalid username'
         elif not check_password_hash(pwd_hash, password):
             error = 'Invalid password'
@@ -379,9 +378,9 @@ if __name__ == '__main__':
     # Get everything going.
     signal.signal(signal.SIGINT, signal_handler)
     CacheManager.create_cache(CACHE)
-    init_settings(SETTINGS)
+    SettingsManager(SETTINGS)
 
-    to_settings(SETTINGS, 'default_timeline_size', DEFAULT_TIMELINE_SIZE)
+    SettingsManager.add('default_timeline_size', DEFAULT_TIMELINE_SIZE)
 
     follows = fr.get_user_follows()
     follows.append(fr.get_user_link())
@@ -391,8 +390,8 @@ if __name__ == '__main__':
     on_demand_crawler = OnDemandCrawler()
 
     # Create a secret key.
-    to_settings(SETTINGS, 'secret', os.urandom(64).encode('base-64'))
-    app.secret_key = from_settings(SETTINGS, 'secret')
+    SettingsManager.add('secret', os.urandom(64).encode('base-64'))
+    app.secret_key = SettingsManager.get('secret')
 
     # Start the crawler on another thread.
     main_crawler_task = Thread(target=main_crawler.start, name='main_crawler')
