@@ -21,10 +21,7 @@ The expected layout is:
 
 
 # TODO
-# - Add rate limiting.
-# - Add settings to external file so that they can be modified and accessed seperately
 # - Clean up the logic for the get_status/get_post funcs.
-# - Memoize the fr.
 
 
 from flask import Flask, request, session, url_for, redirect,\
@@ -357,6 +354,7 @@ def api_add_post():
 def signal_handler(signal, frame):
     """ Gracefuly shuts down the server when CNTL-C is pressed. """
     if not signal_handler.already_called:
+        print '\nShutting down...'
         signal_handler.already_called = True
         main_crawler.stop()
         on_demand_crawler.stop()
@@ -367,6 +365,7 @@ def signal_handler(signal, frame):
                     thread.join()
                 except AssertionError:
                     print 'Error closing thread.'
+    print 'Goodbye ;)'
     sys.exit(0)
 # This is a static variable inside th sig_handle function.
 signal_handler.already_called = False
