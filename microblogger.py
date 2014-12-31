@@ -187,7 +187,7 @@ def edit_profile():
 
 
 # XML File Getters
-# TODO: Remove these in production. Have nginx do the static file hosting.
+# TODO: Remove these in production. Have apache do the static file hosting.
 
 
 @app.route('/feed')

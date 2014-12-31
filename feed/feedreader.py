@@ -140,17 +140,16 @@ def fetch(start, n=0):
     # Get only the single post.
     if n == 0:
         return starting
+
     # Get n posts.
-    # TODO: This doensnt work....
-    if len(stati[starting:]) < abs(n):
-        if n > 0:
-            return stati[:starting]
-        if n < 0:
-            return stati[starting:]
-    return stati[starting:n]
+    if n < 0:
+        stati = reversed(stati)
+
+    end = starting + abs(n)
+    return stati[starting:ending]
 
 
-def fetch_top(n=20):
+def fetch_top(n=25):
     """ Fetches the n most recent posts in reverse chronological order.  """
     if n < 0:
         raise IndexError
