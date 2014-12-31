@@ -5,9 +5,6 @@ from lxml import etree
 import os
 import json
 
-# TODO
-# - Add pagination support for reading and writing.
-
 
 # User Feed Stuff
 
@@ -24,6 +21,23 @@ def write_user_feed(tree, rel_location):
     """ Write the etree representation of the feed to the rel_locaiton.  """
     with open(rel_location, 'w') as f:
         tree.write(f, pretty_print=True)
+
+
+def get_user_feed_size(rel_location):
+    """ Returns the size, in bytes, of the given feed. """
+    return os.path.getsize(rel_location)
+
+
+def archive_user_feed(src):
+    """ Moves the current user feed to the archive directory.
+    Returns the relative file name of the old file. """
+    import shutil as s, datetime.datetime.now as now, re
+    m = re.search(string=filename, pattern=r'.+/(.+)\.(xml|XML)')
+    orig_filename = m.group(0)
+
+    filename = 'user/archive/{0}_{1}.xml'.format(orig_filename, now().strftime('%Y%m%d_%H%M%S'))
+    s.copy2(src, filename)
+    return filename
 
 
 # Cache Methods
