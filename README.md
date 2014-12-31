@@ -12,7 +12,7 @@ A basic microblogging service implementing the [Open Microblog][1] standard. It 
 
 Take a look [at our wiki][wiki] for how to get started, or jump right in by visiting the [current Issues section][issues].
 
-Check out our IRC channel [#microblogger](irc://chat.freenode.net/microblogger)
+Check out our IRC channel [#microblogger](irc://chat.freenode.net/microblogger) (chat.freenode.net)
 
 [wiki]: https://github.com/Sonictherocketman/Microblogger/wiki
 [issues]: https://github.com/Sonictherocketman/Microblogger/issues
