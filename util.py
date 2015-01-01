@@ -6,6 +6,29 @@ import os
 import json
 
 
+# Util Functions
+
+def convert_url(url, to_relative=False, to_absolute=False):
+    # TODO: Test
+    """ Converts a local xml url between relative and absolute forms.
+    Ex:
+        url = 'http://sample.tld/user/feed.xml'
+        print convert_url(url, to_relative=True)
+        >>> 'user/feed.xml'
+
+        url = 'user/feed.xml'
+        print convert_url(url, to_absolute=True)
+        >>> 'http://sample.tld/user/feed.xml'
+    """
+    if to_relative:
+        return re.search(string=url, pattern=r'(user/(feed|follows|blocks|archive)(/.+)?\.xml)').group(0)
+    elif to_absolute:
+        return SettingsManager.get('domain') + url
+    else:
+        print 'No conversion output selected.'
+        raise ValueError
+
+
 # User Feed Stuff
 
 
