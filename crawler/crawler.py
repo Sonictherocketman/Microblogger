@@ -59,6 +59,11 @@ class OnDemandCrawler(FeedCrawler):
     def get_all_items(self, links, deep_traverse=False):
         """ Does the crawling and returns when the crawling is done. """
         self._deep_traverse = deep_traverse
+        for link in links:
+            self._data[link] = {
+                    'items': [],
+                    'info': {}
+                    }
         self.start(links)
         return self._data
 
@@ -68,19 +73,9 @@ class OnDemandCrawler(FeedCrawler):
 
     def on_item(self, link, item):
         """ Add the item field to the link's dict. """
-        if self._data[link] is None:
-            self._data[link] = {
-                    'items': [],
-                    'info': []
-                    }
         self._data[link]['items'].append(item)
 
     def on_info(self, link, item):
         """ Add the info field to the link's dict. """
-        if self._data[link] is None:
-            self._data[link] = {
-                    'items': [],
-                    'info': []
-                    }
-            self._data[link]['info'].append(post(info))
+        self._data[link]['info'][item[0]] = item[1]
 

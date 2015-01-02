@@ -17,7 +17,8 @@ def _write_to_feed(tree, rel_location):
     u.write_user_feed() """
     # Check if the feed is too big. If so, make a new
     # feed and insert it there.
-    size = u.get_user_feed_size(rel_locaiton)
+    size = u.get_user_feed_size(rel_location)
+    count = len(tree.xpath('//item'))
     if size > SettingsManager.get('max_feed_size_bytes') \
             or count > SettingsManager.get('max_posts_per_feed'):
         old_feed_name = u.archive_user_feed(rel_location)

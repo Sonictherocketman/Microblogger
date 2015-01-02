@@ -82,11 +82,11 @@ def set_username(username):
     u.write_user_feed(feed, 'user/feed.xml')
 
 
-def set_full_username(full_username):
+def set_user_full_name(full_username):
     """ Sets the user's full name. Does not traverse all past nodes.
     Previous feed files are untouched. """
     feed = u.get_user_feed('user/feed.xml')
-    full_element = feed.xpath('//channel/user_full_name')
+    element = feed.xpath('//channel/user_full_name')
     if element:
         element[0].text = full_username
     u.write_user_feed(feed, 'user/feed.xml')

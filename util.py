@@ -8,6 +8,7 @@ import json
 
 # Util Functions
 
+
 def convert_url(url, to_relative=False, to_absolute=False):
     # TODO: Test
     """ Converts a local xml url between relative and absolute forms.
@@ -54,11 +55,11 @@ def get_user_feed_size(rel_location):
 def archive_user_feed(src):
     """ Moves the current user feed to the archive directory.
     Returns the relative file name of the old file. """
-    import shutil as s, datetime.datetime.now as now, re
-    m = re.search(string=filename, pattern=r'.+/(.+)\.(xml|XML)')
+    import shutil as s, re, datetime
+    m = re.search(string=src, pattern=r'(feed|blocks|follows)+\.(xml|XML)')
     orig_filename = m.group(0)
 
-    filename = 'user/archive/{0}_{1}.xml'.format(orig_filename, now().strftime('%Y%m%d_%H%M%S'))
+    filename = 'user/archive/{0}_{1}.xml'.format(orig_filename, datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     s.copy2(src, filename)
     return filename
 

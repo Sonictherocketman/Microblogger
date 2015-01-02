@@ -50,12 +50,16 @@ CACHE = '/tmp/microblog/'
 SETTINGS = os.path.expanduser('~/.microblogger_settings.json')
 ROOT_DIR = '/var/www/microblogger/'
 DEFAULT_TIMELINE_SIZE = 25
+MAX_FILE_SIZE_BYTES = 500000
+MAX_POSTS_PER_FEED = 500
 
 
 # Init the application
 app = Flask(__name__)
 main_crawler = None
 on_demand_crawler = None
+app.debug = True
+
 
 # Site pages
 
@@ -88,6 +92,7 @@ def register():
     if request.method == 'POST':
         error = ''
 
+        user_full_name = request.form['full_name']
         username = request.form['username']
         password = request.form['password']
         password_confirm = request.form['password_confirm']
@@ -115,6 +120,7 @@ def register():
         else:
             # Update the feed.
             fg.set_username(username)
+            fg.set_user_full_name(user_full_name)
 
             # Update the settings.
             SettingsManager.add('username', username)
@@ -158,13 +164,13 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route('/edit_profile', methods=['GET', 'POST'])
-def edit_profile():
+@app.route('/account', methods=['GET', 'POST'])
+def account():
     """ Allows the user to make changes to their profile. """
     if 'user_id' not in session:
         return redirect(url_for('home', error='Please log in to make changes.'))
     elif request.method == 'GET':
-        return render_template('profile.html', user=fr.get_user())
+        return render_template('account.html', user=fr.get_user())
     else:
         if request.form['change_full_name'] == 'True':
             user_full_name = request.form['user_full_name']
@@ -183,32 +189,20 @@ def edit_profile():
         if request.form['change_language'] == 'True':
             language = request.form['language']
             # TODO: Add language change function to fu.
-        return render_template('profile.html', error='Your settings have been saved.')
+        return render_template('account.html', error='Your settings have been saved.')
 
 
-# XML File Getters
-# TODO: Remove these in production. Have apache do the static file hosting.
-
-
-@app.route('/feed')
-def feed():
-    """ This just returns the user's XML feed. """
-    with open('user/feed.xml') as f:
-        return f.read()
-
-
-@app.route('/blocks')
-def blocks():
-    """ Returns the user's block list. """
-    with open('user/blocks.xml') as f:
-        return f.read()
-
-
-@app.route('/follows')
-def follows():
-    """ Returns the user's block list. """
-    with open('user/follows.xml') as f:
-        return f.read()
+@app.route('/<user_id>/follows')
+def get_user_follows(user_id):
+    """ Display a list of the users that a given user follows. """
+    if user_id == fr.get_user_id():
+        return render_template('follows.html', user=fr.get_user(), follows=fr.get_user_follows())
+    elif 'user_id' in session:
+        # TODO: Call the on_demand_crawler to fetch a
+        # list of the follows that a remote user has.
+        pass
+    else:
+        return redirect(url_for(), error='Please log in to see other\s profiles.')
 
 
 # Status and Profile Handlers
@@ -231,8 +225,26 @@ def add_status():
     })
     return redirect(url_for('home'))
 
+@app.route('/add_follow', methods=['POST'])
+def add_follow():
+    """ Adds a new follow to the user's list. """
+    if 'user_id' not in session:
+        abort(401)
 
-@app.route('/user/<user_id>/', methods=['GET'])
+    user_link = request.form['follow-url']
+    print user_link
+    # Using the link given by the user, tell the
+    # crawler to get the rest of the info.
+    user_info = on_demand_crawler.get_all_items([user_link])
+
+    user_name = user_info['username']
+    user_id = user_info['user_id']
+
+    fu.add_follow_user(user_id=user_id, user_name=user_name, user_link=user_link)
+    return redirect(url_for('home'))
+
+
+@app.route('/<user_id>/profile', methods=['GET'])
 def get_user_profile(user_id):
     """ Get the profile of the given user."""
     # TODO: Test this...
@@ -268,7 +280,7 @@ def get_user_profile(user_id):
     return render_template('timeline.html', user=user, posts=posts)
 
 
-@app.route('/status/<user_id>/<status_id>', methods=['GET'])
+@app.route('/<user_id>/<status_id>', methods=['GET'])
 def get_status_by_user(user_id, status_id):
     """ Get a given status by a given user. """
     # TODO: Test this...
@@ -318,6 +330,31 @@ def get_status_by_user(user_id, status_id):
             post = find_and_package_items(items)
 
     return render_template('individual_post.html', user=user, post=post)
+
+
+# XML File Getters
+# TODO: Remove these in production. Have apache do the static file hosting.
+
+
+@app.route('/feed')
+def feed():
+    """ This just returns the user's XML feed. """
+    with open('user/feed.xml') as f:
+        return f.read()
+
+
+@app.route('/blocks')
+def blocks():
+    """ Returns the user's block list. """
+    with open('user/blocks.xml') as f:
+        return f.read()
+
+
+@app.route('/follows')
+def follows():
+    """ Returns the user's block list. """
+    with open('user/follows.xml') as f:
+        return f.read()
 
 
 # REST APIs
@@ -410,6 +447,8 @@ if __name__ == '__main__':
     SettingsManager(SETTINGS)
 
     SettingsManager.add('default_timeline_size', DEFAULT_TIMELINE_SIZE)
+    SettingsManager.add('max_feed_size_bytes', MAX_FILE_SIZE_BYTES)
+    SettingsManager.add('max_posts_per_feed', MAX_POSTS_PER_FEED)
 
     follows = fr.get_user_follows()
     follows.append(fr.get_user_link())

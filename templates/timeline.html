@@ -10,7 +10,7 @@
 {% block profile %}
 <div class='user-info'>
 	<span class='user_full_name'>{{ user['user_full_name'] }}</span>
-	<span class='username'><a href='/user/{{ user["user_id"] }}'>{{ user['username'] }}</a></span>
+	<span class='username'><a href='/{{ user["user_id"] }}/profile'>{{ user['username'] }}</a></span>
 </div>
 <div class='bio'>{{ user['bio'] }}</div>
 {% endblock %}
@@ -33,6 +33,19 @@
 					<input rows="3" cols="50" maxLength="200" name='post-text'/>
 				</div>
 				<input type='submit' value='Post' />
+			</div>
+		</form>
+	</div>
+</div>
+<input id='new-follow-template-is-shown' type='hidden' value='false'/>
+<div id='new-follow-template' class='hidden'>
+	<div class='post post-template'>
+		<form action='{{ url_for('add_follow') }}' method='POST'>
+			<div class='post-content'>
+				<div class='text center'>
+					<input rows="1" cols="50" maxLength="200" name='follow-url'/>
+				</div>
+				<input type='submit' value='Add' />
 			</div>
 		</form>
 	</div>
