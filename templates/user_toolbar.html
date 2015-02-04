@@ -1,9 +1,23 @@
-<div id='reg-toolbar' class='toolbar'>
-	<ul class='toolbar-items'>
-		<li class='toolbar-item'><a href='/'>Home</a></span>
-		<li class='toolbar-item'><a href='javascript:void(0)' onclick='toggleNewPostTemplate();'>New Post</a></span>
-		<li class='toolbar-item'><a href='javascript:void(0)' onclick='toggleNewFollowTemplate();'>Follow someone</a></span>
-		<li class='toolbar-item'><a href='/account'>Account</a></span>
-		<li class='toolbar-item'><a href='/logout'>Log out</a></span>
-	</ul>
-</div>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href='/'><span class='glyphicon glyphicon-home'></span>&nbsp;Home</a></li>
+		<li><a href='javascript:void(0)' onclick='toggleNewPostTemplate();'><span class='glyphicon glyphicon-comment'></span>&nbsp;Post</a></span>
+		<li><a href='javascript:void(0)' onclick='toggleNewFollowTemplate();'><span class='glyphicon glyphicon-plus'></span>&nbsp;Follow</a></span>
+        <li><a href='/account'><span class='glyphicon glyphicon-user'></span>&nbsp;Account</a></li>
+        <li><a href='/logout'><span class='glyphicon glyphicon-log-out'></span>&nbsp;Log Out</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>

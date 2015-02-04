@@ -137,13 +137,26 @@ def main():
     if not location[-1] == '/':
         location + '/'
 
+    # Get the admin info.
+    print '''
+    What email address can we send errors to?
+    '''
+    email = raw_input('>>')
+    print '''
+    What is the desired server name?
+    i.e. microblog.mydomain.com
+    '''
+    domain = raw_input('>>')
+
     # Create the custom Apache conf.
     conf = ''
     with open('bin/httpd.conf-addition', 'r') as f:
         conf = f.read()
     conf = conf.replace('{{WSGI_USER}}', user)\
             .replace('{{WSGI_DIR}}', location)\
-            .replace('{{WSGI_FILE_LOCATION}}', location + 'microblogger.wsgi')
+            .replace('{{WSGI_FILE_LOCATION}}', location + 'microblogger.wsgi')\
+            .replace('{{ADMIN_EMAIL}}', email)\
+            .replace('{{SERVER_NAME}}', domain)
 
     print '''
     Do you want to automatically install the Apache configuration? (y/N)
@@ -231,6 +244,13 @@ def main():
     Press any enter to continue.
     '''.format(bcolors.OKGREEN, bcolors.ENDC)
         raw_input('>>')
+
+        # Make the wsgi and cp it to the root of the web server.
+        with open('bin/microblogger.wsgi', 'r') as f1:
+            contents = f1.read()
+            contents = contents.replace('{{WSGI_FILE_LOCATION}}', location + 'microblogger.wsgi')
+            with open('microblogger.wsgi', 'w') as f2:
+                f2.write(contents)
 
         # Crawler Crontab Setup.
         print '''

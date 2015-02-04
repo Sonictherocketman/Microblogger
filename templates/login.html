@@ -1,37 +1,25 @@
 {% extends "layout.html" %}
 
-{% block head %}
-<link rel='stylesheet' type='text/css' href='static/css/styles.css' />
-<script type='text/javascript' href='static/js/timeline.js'></script>
-{% endblock %}
-
 {% block title %}Login to your account{% endblock %}
+{% block head %}
+<link href="/static/css/login.css" rel="stylesheet">
+{% endblock %}
 
 {% block profile %}
 <div class='header'>
-	<h1>Log in</h1>
+	<h2 class="form-signin-heading">Please sign in</h2>
 </div>
 <div class='error'>
 	<span>{{ error }}</span>
 </div>
 {% endblock %}
 
-{% block post_list %}
-<div class='sign-in-form'>
-	<form name='new-account-form' method='POST' action='/login'>
-		<table>
-			<tr>
-				<td>Username: </td>
-				<td><input type='text' name='username'/></td>
-			</tr>
-			<tr>
-				<td>Password: </td>
-				<td><input type='text' name='password'/></td>
-			</tr>
-			<tr>
-				<td>{# blank cell #}</td><td><input type='submit' value='Log in' /></td>
-			</tr>
-		</table>
-	</form>
-</div>
+{% block other_content %}
+<div class="container">
+  <form name='sign-in-form' class="form-signin" method='POST' action='/login'>
+	<input type="username" name="username" class="form-control" placeholder="Username" required autofocus />
+	<input type="password" name="password" class="form-control" placeholder="Password" required />
+	<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+  </form>
+</div> <!-- /container -->
 {% endblock %}

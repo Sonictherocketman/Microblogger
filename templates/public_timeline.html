@@ -1,11 +1,6 @@
 {% extends "layout.html" %}
 
-{% block head %}
-<link rel='stylesheet' type='text/css' href='static/css/styles.css' />
-<script type='text/javascript' href='static/js/timeline.js'></script>
-{% endblock %}
-
-{% block title %}This is the title{% endblock %}
+{% block title %}{{ username }}'s microblog{% endblock %}
 
 {% block profile %}
 <div class='user-info'>

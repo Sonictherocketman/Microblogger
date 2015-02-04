@@ -1,9 +1,9 @@
-<div class='post'>
-	<div class='post-header'>
-		<span class='user_full_name'>{{ user['user_full_name'] }}</span>
-		<span class='username'><a href='{{ user_link }}'>{{ user['username'] }}</a></span>
+<div class="panel panel-default">
+ <div class="panel-heading">
+ 		<span class='user_full_name'>{{ user['user_full_name'] }}</span>
+		<span class='username'><a href='{{ user_link }}'>@{{ user['username'] }}</a></span>
 	</div>
-	<div class='post-content'>
+  <div class="panel-body">
 		<div class='text'>{{ post['description'] }}</div>
 		<span class='time'>{{ post['pubdate'] }}</span>
 	</div>

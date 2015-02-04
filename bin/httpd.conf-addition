@@ -1,0 +1,23 @@
+
+
+##
+# Microblog
+##
+WSGISocketPrefix run/wsg
+<VirtualHost *:80>
+    ServerAdmin {{ADMIN_EMAIL}}
+    ServerName {{SERVER_NAME}}
+    # WSGI Stuff
+    WSGIDaemonProcess microblogger user={{WSGI_USER}} group={{WSGI_USER}} threads=5 home={{WSGI_DIR}}
+    WSGIScriptAlias / {{WSGI_FILE_LOCATION}}
+    <Directory {{WSGI_DIR}}>
+        WSGIScriptReloading On
+        WSGIProcessGroup microblogger
+        WSGIApplicationGroup %{GLOBAL}
+        Order deny,allow
+        Allow from all
+    </Directory>
+</VirtualHost>
+##
+# End Microblog
+##

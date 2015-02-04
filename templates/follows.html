@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}This is the title{% endblock %}
+
+{% block profile %}
+<div class='user-info'>
+	<span class='user_full_name'>{{ user['user_full_name'] }}</span>
+	<span class='username'><a href='{{ user_link }}'>{{ user['username'] }}</a></span>
+</div>
+<div class='bio'>{{ user['bio'] }}</div>
+{% endblock %}
+
+{% block post_list %}
+	{# Add the item to the list. #}
+	{% if follows is none or follows|length > 0 %}
+		{% include 'no_entries.html' %}
+	{% endif %}
+	{% for item in follows %}
+		{% include 'user.html' %}
+	{% endfor %}
+{% endblock %}		
