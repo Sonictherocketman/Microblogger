@@ -34,7 +34,6 @@ class CacheManager():
         Cache location should be a dir to store all cache files. """
         CacheManager.cache_location = None       # The dir that holds the whole cache.
         CacheManager.cache_file_location = None  # The JSON file that contains posts, etc.
-        CacheManager.cached_post_count = 0
 
         if cache_location is not None and \
                 not os.path.isfile(cache_location):

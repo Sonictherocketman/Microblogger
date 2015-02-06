@@ -29,7 +29,7 @@ from crontab import CronTab
 
 # Configuration
 CACHE = '/tmp/microblog/'
-SETTINGS = os.path.expanduser('~/.microblogger_settings.json')
+SETTINGS = '~{0}/.microblogger_settings.json'
 ROOT_DIR = '/var/www/microblogger/'
 DEFAULT_TIMELINE_SIZE = 25
 MAX_FILE_SIZE_BYTES = 500000
@@ -78,24 +78,6 @@ def main():
         '''
         sys.exit()
 
-    print '''
-    Configuring...
-    Creating caches...
-    '''
-
-    # Get everything going.
-    CacheManager.create_cache(CACHE)
-    SettingsManager(SETTINGS)
-
-    SettingsManager.add('default_timeline_size', DEFAULT_TIMELINE_SIZE)
-    SettingsManager.add('max_feed_size_bytes', MAX_FILE_SIZE_BYTES)
-    SettingsManager.add('max_posts_per_feed', MAX_POSTS_PER_FEED)
-
-    # Create a secret key.
-    SettingsManager.add('secret', os.urandom(64).encode('base-64'))
-
-    print '    {0}OK{1}'.format(bcolors.OKGREEN, bcolors.ENDC)
-
     # Apache config.
     print '''
     =========================================
@@ -109,6 +91,27 @@ def main():
     {0}[Error]{1} Please input a valid username.
     '''.format(bcolors.FAIL, bcolors.ENDC)
         user = raw_input('>>')
+
+    print '''
+    Configuring...
+    Creating caches...
+    '''
+
+    # Get everything going.
+    global SETTINGS
+    SETTINGS = os.path.expanduser(SETTINGS.format(user))
+    CacheManager.create_cache(CACHE)
+    SettingsManager(SETTINGS)
+
+    SettingsManager.add('default_timeline_size', DEFAULT_TIMELINE_SIZE)
+    SettingsManager.add('max_feed_size_bytes', MAX_FILE_SIZE_BYTES)
+    SettingsManager.add('max_posts_per_feed', MAX_POSTS_PER_FEED)
+
+    # Create a secret key.
+    SettingsManager.add('secret', os.urandom(64).encode('base-64'))
+
+    print '    {0}OK{1}'.format(bcolors.OKGREEN, bcolors.ENDC)
+
     print '''
     =========================================
     {0}Automatic Apache Installation{1}
@@ -270,7 +273,7 @@ def main():
         cron = CronTab(user=user)
 
         # Create a job to run the crawler.
-        job = cron.new(command='/usr/bin/python {0}'.format(location + 'crawler/crawler.py'),
+        job = cron.new(command='/usr/bin/python {0}'.format(location + 'startcrawler.py'),
                 comment='Microblogger: Runs the crawler automatically.')
         job.minute.every(1)
 

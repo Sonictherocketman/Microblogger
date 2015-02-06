@@ -12,13 +12,18 @@ import time
 class MicroblogFeedCrawler(FeedCrawler):
     """ A basic subclass of the microblogcrawler. """
 
-    def __init__(self, links, start_now=False, deep_traverse=False):
+    def __init__(self, links, start_now=False, deep_traverse=False, cache_location=None):
         """ Init a new crawler. """
         # If a user is blocking a given user, then do
         # not show their messages or replies.
         self.block_list = []
         self.ignore_user = False
         self.user_info = []
+        # Instantiate the cache manager at the location given. Now we can use the cache.
+        if cache_location is None:
+            raise ValueError('Cache location is required for multiprocessed crawling.')
+        CacheManager(cache_location)
+        # Call the superclass init.
         FeedCrawler.__init__(self, links, start_now=start_now, deep_traverse=deep_traverse)
 
     def on_start(self):
