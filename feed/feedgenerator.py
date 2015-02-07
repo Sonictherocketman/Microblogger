@@ -11,7 +11,7 @@ from lxml.etree import CDATA
 # Generate new feeds.
 
 
-def generate_new_feed(location='user/feed.xml'):
+def generate_new_feed(location='user/feed.xml', username='', user_ud='',):
     """ Creates a blank XML feed and writes it. To fill in the
     information for the feed use the other helper methods provided. """
     feed = E.channel(

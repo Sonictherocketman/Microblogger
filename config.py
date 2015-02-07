@@ -106,7 +106,7 @@ def main():
     SettingsManager.add('default_timeline_size', DEFAULT_TIMELINE_SIZE)
     SettingsManager.add('max_feed_size_bytes', MAX_FILE_SIZE_BYTES)
     SettingsManager.add('max_posts_per_feed', MAX_POSTS_PER_FEED)
-
+    SettingsManager.add('cache_location', CACHE)
     # Create a secret key.
     SettingsManager.add('secret', os.urandom(64).encode('base-64'))
 

@@ -5,9 +5,10 @@ import sys
 
 from crawler.crawler import MicroblogFeedCrawler
 from feed import feedreader as fr
+from settingsmanager import SettingsManager
 
 
-ID_LOCATION = '/tmp/microblogger/pid'
+PID_LOCATION = '/tmp/microblog/pid'
 
 
 def main():
@@ -17,10 +18,12 @@ def main():
         with open(PID_LOCATION, 'w') as f:
             f.write('working')
 
+        print 'Starting...'
         follows = fr.get_user_follows()
         follows.append(fr.get_user_link())
 
-        crawler = MicroblogFeedCrawler(follows)
+        crawler = MicroblogFeedCrawler(follows,
+                cache_location=SettingsManager.get('cache_location'))
         crawler.start()
 
 

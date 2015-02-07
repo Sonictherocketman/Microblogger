@@ -35,8 +35,7 @@ class CacheManager():
         CacheManager.cache_location = None       # The dir that holds the whole cache.
         CacheManager.cache_file_location = None  # The JSON file that contains posts, etc.
 
-        if cache_location is not None and \
-                not os.path.isfile(cache_location):
+        if cache_location is not None:
             CacheManager.create_cache(cache_location)
 
     @staticmethod

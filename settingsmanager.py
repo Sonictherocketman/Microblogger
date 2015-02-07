@@ -8,7 +8,7 @@ from util import to_settings, from_settings
 class SettingsManager():
 
     # Class Variables
-    settings_file_location = None
+    settings_file_location = os.path.expanduser('~/.microblogger_settings.json')
 
     # Init/Destroy
 
