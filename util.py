@@ -72,8 +72,8 @@ def from_cache(cache, key):
     if os.path.isfile(cache):
         with open(cache, 'r') as f:
             cache_data = json.loads(f.read())
-            if key in cache_data.keys():
-                return cache_data[key]
+        if key in cache_data.keys():
+            return cache_data[key]
 
 
 def to_cache(cache, key, value):

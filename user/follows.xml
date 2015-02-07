@@ -3,6 +3,6 @@
         <username>my_user</username>
         <user_id>2345678543</user_id>
         <link>http://sample.tld/microblog</link>
-        <lastBuildDate></lastBuildDate>
+        <lastBuildDate/>
     </channel>
 </rss>
