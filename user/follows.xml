@@ -4,5 +4,5 @@
         <user_id>2345678543</user_id>
         <link>http://sample.tld/microblog</link>
         <lastBuildDate/>
-    </channel>
+    <item><user_id>1234567890</user_id><user_name>sonicrocketman</user_name><user_link>http://microblog.brianschrader.com/feed</user_link></item></channel>
 </rss>

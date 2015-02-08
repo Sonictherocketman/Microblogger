@@ -19,7 +19,7 @@ def main():
             f.write('working')
 
         print 'Starting...'
-        follows = fr.get_user_follows()
+        follows = fr.get_user_follows_links()
         follows.append(fr.get_user_link())
 
         crawler = MicroblogFeedCrawler(follows,

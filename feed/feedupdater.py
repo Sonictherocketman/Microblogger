@@ -73,7 +73,7 @@ def delete_post(status_id):
 def add_blocked_user(user_id, user_link, user_name):
     """ Adds a given user to the block list.  """
     feed = u.get_user_feed('user/blocks.xml')
-    tree = feed.xpath('/channel/items')
+    tree = feed.xpath('//channel')[0]
     element = E.item(
             E.user_id(user_id),
             E.user_name(user_name),
@@ -86,7 +86,7 @@ def add_blocked_user(user_id, user_link, user_name):
 def add_follow_user(user_id, user_link, user_name):
     """ Adds a given user to the list of users to follow. """
     feed = u.get_user_feed('user/follows.xml')
-    tree = feed.xpath('/channel/items')
+    tree = feed.xpath('//channel')[0]
     element = E.item(
             E.user_id(user_id),
             E.user_name(user_name),
