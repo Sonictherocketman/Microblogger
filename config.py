@@ -251,7 +251,7 @@ def main():
         # Make the wsgi and cp it to the root of the web server.
         with open('bin/microblogger.wsgi', 'r') as f1:
             contents = f1.read()
-            contents = contents.replace('{{WSGI_FILE_LOCATION}}', location + 'microblogger.wsgi')
+            contents = contents.replace('{{WSGI_FILE_LOCATION}}', location)
             with open('microblogger.wsgi', 'w') as f2:
                 f2.write(contents)
 
