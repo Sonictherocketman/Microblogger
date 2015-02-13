@@ -2,7 +2,7 @@
 
 from microblogcrawler.crawler import FeedCrawler
 from util import from_settings
-from feed.feedreader import get_user_follows_links, get_user_blocks_links
+from feed.feedreader import get_user_link, get_user_follows_links, get_user_blocks_links
 from post import post
 from cachemanager import CacheManager
 
@@ -28,7 +28,10 @@ class MicroblogFeedCrawler(FeedCrawler):
 
     def on_start(self):
         """ Refresh the follows list and the blocks list. """
-        print self._links
+        links = get_user_follows_links()
+        links.append(get_user_link())
+        print links
+        return links
 
     def on_finish(self):
         """ Handle end of crawling process. """

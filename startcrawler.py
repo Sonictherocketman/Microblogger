@@ -19,10 +19,7 @@ def main():
             f.write('working')
 
         print 'Starting...'
-        follows = fr.get_user_follows_links()
-        follows.append(fr.get_user_link())
-
-        crawler = MicroblogFeedCrawler(follows,
+        crawler = MicroblogFeedCrawler([],
                 cache_location=SettingsManager.get('cache_location'))
         crawler.start()
 
