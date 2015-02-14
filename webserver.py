@@ -44,7 +44,7 @@ from settingsmanager import SettingsManager
 app = Flask(__name__)
 main_crawler = None
 on_demand_crawler = None
-#app.debug = True
+app.debug = True
 app.secret_key = SettingsManager.get('secret')
 CacheManager(cache_location=SettingsManager.get('cache_location'))
 
@@ -167,6 +167,9 @@ def logout():
     GET will display the logout page. """
     session.pop('user_id', None)
     return redirect(url_for('home'))
+
+
+# Account Management
 
 
 @app.route('/account', methods=['GET', 'POST'])
@@ -421,5 +424,6 @@ def api_add_post():
 
 if __name__ == '__main__':
     # Start up the app
+    print 'Hi. This is debug mode.'
     app.run(use_reloader=False)
 

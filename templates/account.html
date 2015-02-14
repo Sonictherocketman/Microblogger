@@ -2,59 +2,80 @@
 
 {% block head %}
 <script type='text/javascript'>
+
+function setChangeFlag(el) {
+	$('#' + $(el).attr('id') + '_changed').val('true');
+}
+
+function saveToForm(el) {
+	$('#' + $(el).attr('id') + '_text').val($(el).text());
+	$('#' + $(el).attr('id') + '_changed').val('true');
+}
+
 </script>
 {% endblock %}
 
 {% block title %}This is the title{% endblock %}
 
 {% block profile %}
-<div class='user-info'>
-	<span class='user_full_name'>{{ user['user_full_name'] }}</span>
-	<span class='username'><a href='/{{ user["user_id"] }}/profile'>{{ user['username'] }}</a></span>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<span class='user_full_name'>{{ user['user_full_name'] }}</span>
+		<span class='username'><a href='{{ user_link }}'>@{{ user['username'] }}</a></span>
+	</div>
+		<div class="panel-body">
+		<div class='bio'>{{ user['bio'] }}</div>
+	</div>
 </div>
-<div class='bio'>{{ user['bio'] }}</div>
 {% endblock %}
 
 {% block post_list %}
 <form method='POST' action='{{ url_for("account") }}'>
-	<div class='post'>
-		<div class='post-header'>
-			<span>Full name:</span>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Change your account settings
 		</div>
-		<div class='post-content'>
-			<input type='hidden' id='full_name_changed' value='false' />
-			<input type='text' id='full_name' value='{{ user["user_full_name"] }}' onchange='javascript::setChangeFlag()'/>
+		<div class="panel-body">
+			<div class='post'>
+				<div class='post-header'>
+					<span>Full name:</span>
+				</div>
+				<div class='post-content'>
+					<input type='hidden' id='full_name_changed' value='false' />
+					<input type='text' name='full_name' id='full_name' value='{{ user["user_full_name"] }}' onchange='setChangeFlag(this);'/>
+				</div>
+			</div>
+			<div class='post'>
+				<div class='post-header'>
+					<span>Username:</span>
+				</div>
+				<div class='post-content'>
+					<input type='hidden' id='username_changed' value='false' />
+					<input type='text' name='username' id='username' value='{{ user["username"] }}' onchange='setChangeFlag(this);'/>
+				</div>
+			</div>
+			<div class='post'>
+				<div class='post-header'>
+					<span>Bio:</span>
+				</div>
+				<div class='post-content'>
+					<input type='hidden' id='bio_changed' value='false' />
+					<input type='hidden' name='bio' id='bio_text' />
+					<textarea id='bio' rows='4' cols='18' maxlength='250' placeholder='Describe yourself!' onchange='saveToForm(this);'>{{ user['bio'] }}</textarea>
+				</div>
+			</div>
+			<div class='post'>
+				<div class='post-header'>
+					<span>Change Password:</span>
+				</div>
+				<div class='post-content'>
+					<input type='hidden' id='password_changed' value='false' />
+					New Password: <input type='text' name='password' id='password' onchange='setChangeFlag(this);'/><br />
+					Confirm Password: <input type='text' name='password_confirm' id='password_confirm' />
+				</div>
+			</div>
+			<button type='submit'>Save</button>
 		</div>
 	</div>
-	<div class='post'>
-		<div class='post-header'>
-			<span>Username:</span>
-		</div>
-		<div class='post-content'>
-			<input type='hidden' id='username_changed' value='false' />
-			<input type='text' id='username' value='{{ user["username"] }}' onchange='javascript::setChangeFlag()'/>
-		</div>
-	</div>
-	<div class='post'>
-		<div class='post-header'>
-			<span>Bio:</span>
-		</div>
-		<div class='post-content'>
-			<input type='hidden' id='bio_changed' value='false' />
-			<input type='hidden' id='bio' />
-			<textarea id='bio_text' rows='4' cols='18' maxlength='250' placeholder='Describe yourself!' onchange='javascript::saveToForm()'>{{ user['bio'] }}</textarea>
-		</div>
-	</div>
-	<div class='post'>
-		<div class='post-header'>
-			<span>Change Password:</span>
-		</div>
-		<div class='post-content'>
-			<input type='hidden' id='password_changed' value='false' />
-			New Password: <input type='text' id='password' onchange='javascript::setChangeFlag()'/><br />
-			Confirm Password: <input type='text' id='password_confirm' />
-		</div>
-	</div>
-	<button onclick='javascript::submitAccountChanges()'>Save</button>
 </form>
 {% endblock %}		

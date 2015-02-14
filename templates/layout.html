@@ -3,6 +3,10 @@
 <head>
 	<link rel='stylesheet' type='text/css' href='/static/css/styles.css' />
 	<script type='text/javascript' src='/static/js/timeline.js'></script>
+	
+	<!-- jQuery -->
+	<script type='text/javascript' src='/static/js/jquery.min.js'></script>
+    
 	<!-- Bootstrap -->
 	<script type='text/javascript' src='/static/dist/js/bootstrap.min.js'></script>
     <meta charset="utf-8">
@@ -18,6 +22,21 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    
+    <!-- iOS Webapp Meta -->
+	<!-- <link rel="apple-touch-icon" href="img/icon.png"/> -->
+    <meta name="apple-mobile-web-app-title" content="Microblogger">    
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="viewport" content = "width=device-width, initial-scale=1, user-scalable=no" />
+    <!-- Disable automatic phone number detection. -->
+    <meta name="format-detection" content="telephone=no">
+
+	<!-- HACKS -->
+    <!-- Prevent text size change on orientation change. -->
+    <style>
+      html { -webkit-text-size-adjust: 100%; }
+    </style>
 	{% block head %}
 		<title>{% block title %}{% endblock title %}</title>
 	{% endblock head %}
