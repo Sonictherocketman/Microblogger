@@ -75,7 +75,6 @@ def home():
         posts = CacheManager.get_timeline()
     else:
         posts = fr.fetch_top()
-    print user
     return render_template('timeline.html', posts=posts, user=user)
 
 
@@ -172,7 +171,7 @@ def logout():
 
 # Account Management
 
-
+# TODO This still doesn't work
 @app.route('/account', methods=['GET', 'POST'])
 def account():
     """ Allows the user to make changes to their profile. """
