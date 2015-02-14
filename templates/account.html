@@ -15,7 +15,7 @@ function saveToForm(el) {
 </script>
 {% endblock %}
 
-{% block title %}This is the title{% endblock %}
+{% block title %}Account and System Settings{% endblock %}
 
 {% block profile %}
 <div class="panel panel-default">
@@ -30,52 +30,76 @@ function saveToForm(el) {
 {% endblock %}
 
 {% block post_list %}
-<form method='POST' action='{{ url_for("account") }}'>
+<!-- ==============================================================
+	 Account Settings
+     ============================================================== -->
+<form method='post' action='{{ url_for("account") }}' name='account_settings_form'>
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			Change your account settings
+			Account Settings
 		</div>
 		<div class="panel-body">
 			<div class='post'>
-				<div class='post-header'>
-					<span>Full name:</span>
-				</div>
+				<label for='full_name'>Full name:</label>
+				<input type='hidden' name='full_name_changed' id='full_name_changed' value='false' />
+				<input type='text' class="form-control" name='full_name' id='full_name' value='{{ user["user_full_name"] }}' onchange='setChangeFlag(this);'/>
+			</div>
+			<div class='post'>
 				<div class='post-content'>
-					<input type='hidden' id='full_name_changed' value='false' />
-					<input type='text' name='full_name' id='full_name' value='{{ user["user_full_name"] }}' onchange='setChangeFlag(this);'/>
+					<input type='hidden' name='username_changed' id='username_changed' value='false' />
+					<label for='username'>Username:</label>
+					<div class="input-group">
+						<span class="input-group-addon" id="basic-addon1">@</span>
+						<input type='text' class="form-control" placeholder="Username" aria-describedby="basic-addon1" name='username' id='username' value='{{ user["username"] }}' onchange='setChangeFlag(this);'/>
+					</div>
 				</div>
 			</div>
 			<div class='post'>
-				<div class='post-header'>
-					<span>Username:</span>
-				</div>
-				<div class='post-content'>
-					<input type='hidden' id='username_changed' value='false' />
-					<input type='text' name='username' id='username' value='{{ user["username"] }}' onchange='setChangeFlag(this);'/>
-				</div>
+				<label for='email'>Email:</label>
+				<input type='hidden' name='email_changed' id='email_changed' value='false' />
+				<input type='text' class="form-control" placeholder='An email we can send errors to.' name='email' id='email' value='{{ user["email"] }}' onchange='setChangeFlag(this);'/>
 			</div>
 			<div class='post'>
-				<div class='post-header'>
-					<span>Bio:</span>
-				</div>
 				<div class='post-content'>
-					<input type='hidden' id='bio_changed' value='false' />
+					<label for='bio'>Bio:</label>
+					<input type='hidden' name='bio_changed' id='bio_changed' value='false' />
 					<input type='hidden' name='bio' id='bio_text' />
-					<textarea id='bio' rows='4' cols='18' maxlength='250' placeholder='Describe yourself!' onchange='saveToForm(this);'>{{ user['bio'] }}</textarea>
+					<textarea id='bio' class="form-control" rows='4' maxlength='250' placeholder='Describe yourself!' onchange='saveToForm(this);'>{{ user['bio'] }}</textarea>
 				</div>
 			</div>
+			<button class='btn btn-primary type='submit'>Save</button>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Change Password
+		</div>
+		<div class="panel-body">
 			<div class='post'>
-				<div class='post-header'>
-					<span>Change Password:</span>
-				</div>
 				<div class='post-content'>
-					<input type='hidden' id='password_changed' value='false' />
-					New Password: <input type='text' name='password' id='password' onchange='setChangeFlag(this);'/><br />
-					Confirm Password: <input type='text' name='password_confirm' id='password_confirm' />
+					<input type='hidden' changed='password_changed' id='password_changed' value='false' />
+					<label for='password'>New Password:</label>
+					<input type='text' class="form-control" name='password' id='password' onchange='setChangeFlag(this);'/><br />
+					<label for='password_confirm'>Confirm Password:</label>
+					<input type='text' class="form-control" name='password_confirm' id='password_confirm' />
 				</div>
 			</div>
-			<button type='submit'>Save</button>
+			<button class='btn btn-primary type='submit'>Save</button>
 		</div>
 	</div>
 </form>
+<!-- ==============================================================
+	 System Settings
+     ============================================================== -->
+<form method='post' action='{{ url_for("account") }}' name='account_settings_form'>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			System Settings
+		</div>
+		<div class="panel-body">
+			Coming soon...
+		</div>
+	</div>
+</form>
+     
 {% endblock %}		

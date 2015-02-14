@@ -63,6 +63,10 @@
  * Post styling
  */
  
+ .post {
+ 	margin-bottom: 10px;
+ }
+ 
  .post .post-header {
  
  }
