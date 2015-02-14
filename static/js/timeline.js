@@ -39,3 +39,20 @@ function toggleNewFollowTemplate() {
 		//Remove the template from the view.
 	}
 }
+
+/**
+ * Displays a section that has the user's feed link for easy following.
+ */
+function toggleFollowMeMsg() {
+	var templateIsShown = document.getElementById('follow-me-msg-is-shown');
+	if (templateIsShown.value !== 'true') {
+		templateIsShown.value = 'true'
+		var timeline = document.getElementById('post-list');
+		var newPostTemplate = document.getElementById('follow-me-msg');
+		timeline.innerHTML = newPostTemplate.innerHTML + timeline.innerHTML;
+		$('#follow-link')[0].focus();
+	}
+	else {
+		//Remove the template from the view.
+	}
+}

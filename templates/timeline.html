@@ -5,8 +5,10 @@
 {% block profile %}
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<span class='user_full_name'>{{ user['user_full_name'] }}</span>
-		<span class='username'><a href='{{ user_link }}'>@{{ user['username'] }}</a></span>
+		<div class='panel-title'>
+			<span class='user_full_name'>{{ user['user_full_name'] }}</span>
+			<span class='username'><a href='{{ user['user_profile'] }}'>@{{ user['username'] }}</a></span>
+		</div>
 	</div>
 		<div class="panel-body">
 		<div class='bio'>{{ user['bio'] }}</div>
@@ -54,5 +56,17 @@
 			</div>
 		</div>
 	</form>
+</div>
+<input id='follow-me-msg-is-shown' type='hidden' value='false'/>
+<div id='follow-me-msg' class='hidden'>
+	<div class="panel panel-default">
+		<div class="panel-body">
+			<div class='post text center'>
+				<label for='follow-link'>Copy this into your Microblog client of choice</label>
+				<input id='follow-link' class='form-control' value="{{ user['user_link'] }}" onclick="this.select()"/>
+			</div>
+			<!--<input class='btn btn-primary' type='button' value='Copy' />-->
+		</div>
+	</div>
 </div>
 {% endblock %}

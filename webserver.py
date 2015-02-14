@@ -75,6 +75,7 @@ def home():
         posts = CacheManager.get_timeline()
     else:
         posts = fr.fetch_top()
+    print user
     return render_template('timeline.html', posts=posts, user=user)
 
 
