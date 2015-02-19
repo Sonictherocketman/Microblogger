@@ -180,24 +180,38 @@ def account():
     elif request.method == 'GET':
         return render_template('account.html', user=fr.get_user())
     else:
-        if request.form['change_full_name'] == 'True':
-            user_full_name = request.form['user_full_name']
-            fu.set_user_full_name(user_full_name)
-        if request.form['change_bio'] == 'True':
+        # Flask apparently throws 400 errors if POST form data isn't present.
+        # Full name
+        if request.form.get('full_name_changed') == 'true':
+            user_full_name = request.form['full_name']
+            fg.set_user_full_name(user_full_name)
+        # Username
+        if request.form.get('username_changed') == 'true':
+            username = request.form['username']
+            fg.set_username(username)
+        # Bio
+        if request.form.get('bio_changed') == 'true':
             bio = request.form['bio']
-            fu.set_user_bio(bio)
-        if request.form['change_password'] == 'True':
+            fg.set_user_description(bio)
+        # Email
+        if request.form.get('email_changed') == 'true':
+            email = request.form['email']
+            SettingsManager.add('email', email)
+        # Password
+        if request.form.get('password_changed') == 'true':
             password = request.form['password']
             password_confirm = request.form['password_confirm']
             if password == password_confirm:
                 SettingsManager.add(generate_password_hash(password))
-        if request.form['change_relocate'] == 'True':
+        # Relocate [WARNING]
+        if request.form.get('relocate_changed') == 'true':
             relocate_url = request.form['relocate_url']
             fu.relocate_user_feed(relocate_url)
-        if request.form['change_language'] == 'True':
+        # Language
+        if request.form.get('language_changed') == 'true':
             language = request.form['language']
             # TODO: Add language change function to fu.
-        return render_template('account.html', error='Your settings have been saved.')
+        return render_template('account.html', user=fr.get_user(), error='Your settings have been saved.')
 
 
 @app.route('/<user_id>/follows')
