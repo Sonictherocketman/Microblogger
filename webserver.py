@@ -24,6 +24,7 @@ The expected layout is:
 from flask import Flask, request, session, url_for, redirect,\
     render_template, abort
 from werkzeug import check_password_hash, generate_password_hash
+from flask_limiter import Limiter
 
 import os
 import uuid
@@ -42,9 +43,10 @@ from settingsmanager import SettingsManager
 
 # Init the application
 app = Flask(__name__)
+limiter = Limiter(app)
 main_crawler = None
 on_demand_crawler = None
-app.debug = True
+#app.debug = True
 app.secret_key = SettingsManager.get('secret')
 CacheManager(cache_location=SettingsManager.get('cache_location'))
 
@@ -59,7 +61,8 @@ if not app.debug:
             '[in %(pathname)s:%(lineno)d]'
             ))
     app.logger.addHandler(file_handler)
-
+    for handler in app.logger.handlers:
+        limiter.logger.addHandler(handler)
 
 # Site pages
 
@@ -231,6 +234,7 @@ def get_user_follows(user_id):
 
 
 @app.route('/new_status', methods=['POST'])
+@limiter.limit('100 per 15 minute')
 def add_status():
     """ Adds a new post to the feed. """
     if 'user_id' not in session:
@@ -248,6 +252,7 @@ def add_status():
     return redirect(url_for('home'))
 
 @app.route('/add_follow', methods=['POST'])
+@limiter.limit('50 per 15 minutes')
 def add_follow():
     """ Adds a new follow to the user's list. """
     if 'user_id' not in session:
