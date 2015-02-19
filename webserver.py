@@ -21,17 +21,17 @@ The expected layout is:
 # - Clean up the logic for the get_status/get_post funcs.
 
 
-from flask import Flask, request, session, url_for, redirect,\
-    render_template, abort
-from werkzeug import check_password_hash, generate_password_hash
-from flask_limiter import Limiter
-
 import os
 import uuid
 import re
 from datetime import datetime
 import signal
 import sys
+
+from flask import Flask, request, session, url_for, redirect,\
+    render_template, abort
+from werkzeug import check_password_hash, generate_password_hash
+from flask_limiter import Limiter
 
 from feed import feedgenerator as fg,\
         feedreader as fr, \
@@ -63,6 +63,7 @@ if not app.debug:
     app.logger.addHandler(file_handler)
     for handler in app.logger.handlers:
         limiter.logger.addHandler(handler)
+
 
 # Site pages
 
@@ -174,6 +175,7 @@ def logout():
 
 # Account Management
 
+
 # TODO This still doesn't work
 @app.route('/account', methods=['GET', 'POST'])
 def account():
@@ -250,6 +252,7 @@ def add_status():
         'language': fr.get_user_language()
     })
     return redirect(url_for('home'))
+
 
 @app.route('/add_follow', methods=['POST'])
 @limiter.limit('50 per 15 minutes')
