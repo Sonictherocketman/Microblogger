@@ -156,6 +156,8 @@ def main():
     with open('bin/httpd.conf-addition', 'r') as f:
         conf = f.read()
     conf = conf.replace('{{WSGI_USER}}', user)\
+            .replace('{{WSGI_STATIC_DIR}}', location + 'static')\
+            .replace('{{WSGI_FEED_DIR}}', locaiton + 'feed')\
             .replace('{{WSGI_DIR}}', location)\
             .replace('{{WSGI_FILE_LOCATION}}', location + 'microblogger.wsgi')\
             .replace('{{ADMIN_EMAIL}}', email)\
