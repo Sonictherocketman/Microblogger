@@ -2,5 +2,5 @@ MicroblogCrawler==1.1.200
 python-dateutil==2.2
 Flask==0.10.0
 Flask-Limiter=0.7.5
-requests==2.5.1
+requests==2.5.
 lxml==3.4.1
