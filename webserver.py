@@ -295,6 +295,7 @@ def get_user_profile(user_id):
         on_demand_crawler = OnDemandCrawler()
         data = on_demand_crawler.get_all_items(user_link)
         posts = data[user_link[0]]
+        user = posts[0]['user']
 
     return render_template('timeline.html', user=user, posts=posts)
 

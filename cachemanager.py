@@ -56,6 +56,9 @@ class CacheManager():
             location += '/'
         CacheManager.cache_file_location = location + 'cache.json'
 
+        # Does the cache already exist?
+        if os.path.isfile(CacheManager.cache_file_location):
+            return
         # Write the empty cache.
         cache_data = {
                 'timeline': [],
