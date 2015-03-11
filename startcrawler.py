@@ -19,9 +19,12 @@ def main():
             f.write('working')
 
         print 'Starting...'
-        crawler = MicroblogFeedCrawler([],
-                cache_location=SettingsManager.get('cache_location'))
-        crawler.start()
+        links = fr.get_user_follows_links()
+        links.append(fr.get_user_link())
+        print links
+        MicroblogFeedCrawler(links,
+                cache_location=SettingsManager.get('cache_location'),
+                start_now=True)
 
 
 if __name__ == '__main__':

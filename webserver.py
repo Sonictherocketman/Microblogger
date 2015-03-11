@@ -46,7 +46,7 @@ app = Flask(__name__)
 limiter = Limiter(app)
 main_crawler = None
 on_demand_crawler = None
-#app.debug = True
+app.debug = True
 app.secret_key = SettingsManager.get('secret')
 CacheManager(cache_location=SettingsManager.get('cache_location'))
 
@@ -79,6 +79,8 @@ def home():
         posts = CacheManager.get_timeline()
     else:
         posts = fr.fetch_top()
+        for post in posts:
+            post['user'] = user
     return render_template('timeline.html', posts=posts, user=user)
 
 
@@ -277,35 +279,22 @@ def add_follow():
 @app.route('/<user_id>/profile', methods=['GET'])
 def get_user_profile(user_id):
     """ Get the profile of the given user."""
-    # TODO: Test this...
+    # TODO Cache this
     user = None
     posts = []
     if 'user_id' not in session:
         return redirect(url_for('home', error='Please log in to view other\'s profiles.'))
-    elif user_id == fr.get_user_id():
-        user = fr.get_user()
-        posts = fr.fetch_top()
+    #elif user_id == fr.get_user_id():
+    #    user = fr.get_user()
+    #    posts = fr.fetch_top()
     else:
         user_link = [u['user_link'] for u in fr.get_user_follows()
                 if u['user_id'] == user_id]
 
         # Go get the posts for that given user.
+        on_demand_crawler = OnDemandCrawler()
         data = on_demand_crawler.get_all_items(user_link)
-        info = data[user_link[0]]['info']
-        items = data[user_link[0]]['items']
-        user = {
-                'username': info['user_name'],
-                'user_id': info['user_id'],
-                'user_link': info['user_link'],
-                'bio': info['description'],
-                'user_full_name': info['user_full_name']
-                }
-        posts = []
-        for item in items:
-            posts.append({
-                'description': item['description'],
-                'puddate_str': item['pubdate_str']
-                })
+        posts = data[user_link[0]]
 
     return render_template('timeline.html', user=user, posts=posts)
 
@@ -447,5 +436,5 @@ def api_add_post():
 if __name__ == '__main__':
     # Start up the app
     print 'Hi. This is debug mode.'
-    app.run(use_reloader=False)
+    app.run()
 
