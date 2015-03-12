@@ -27,6 +27,8 @@ import re
 from datetime import datetime
 import signal
 import sys
+import pytz
+from email.Utils import formatdate
 
 from flask import Flask, request, session, url_for, redirect,\
     render_template, abort
@@ -249,7 +251,7 @@ def add_status():
 
     fu.add_post({
         'description': request.form['post-text'],
-        'pubdate': datetime.now(),
+        'pubdate': formatdate(),
         'guid': str(uuid.uuid4().int),
         'language': fr.get_user_language()
     })
