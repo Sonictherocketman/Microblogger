@@ -250,7 +250,7 @@ def add_status():
 
     fu.add_post({
         'description': request.form['post-text'],
-        'pubdate': datetime.now(pytz.utc).strftime('%Y%M%D'),
+        'pubdate': datetime.now(pytz.utc),
         'guid': str(uuid.uuid4().int),
         'language': fr.get_user_language()
     })
