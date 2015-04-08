@@ -27,7 +27,7 @@
 {% block footer %}
 <input id='new-post-template-is-shown' type='hidden' value='false'/>
 <div id='new-post-template' class='hidden'>
-	<form action='{{ url_for("add_status") }}' method='POST'>
+	<form action='{{ url_for("post_status") }}' method='POST'>
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<div class='post text center'>
@@ -43,7 +43,7 @@
 </div>
 <input id='new-follow-template-is-shown' type='hidden' value='false'/>
 <div id='new-follow-template' class='hidden'>
-	<form action='{{ url_for('add_follow') }}' method='POST'>
+	<form action='{{ url_for('post_follow') }}' method='POST'>
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<div class='post text center'>

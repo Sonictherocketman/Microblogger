@@ -15,8 +15,8 @@
         <li><a href='/'><span class='glyphicon glyphicon-home'></span>&nbsp;Home</a></li>
 		<li><a href='javascript:void(0)' onclick='toggleNewPostTemplate();'><span class='glyphicon glyphicon-comment'></span>&nbsp;Post</a></span>
 		<li><a href='javascript:void(0)' onclick='toggleNewFollowTemplate();'><span class='glyphicon glyphicon-plus'></span>&nbsp;Follow</a></span>
-        <li><a href='/account'><span class='glyphicon glyphicon-user'></span>&nbsp;Account</a></li>
-        <li><a href='/logout'><span class='glyphicon glyphicon-log-out'></span>&nbsp;Log Out</a></li>
+        <li><a href='{{ url_for('get_account') }}'><span class='glyphicon glyphicon-user'></span>&nbsp;Account</a></li>
+        <li><a href='{{ url_for('logout') }}'><span class='glyphicon glyphicon-log-out'></span>&nbsp;Log Out</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

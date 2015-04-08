@@ -278,7 +278,7 @@ def get_user_blocks(user_id):
 
 @app.route('/<user_id>/<status_id>', methods=['GET'])
 @login_required
-def get_status_by_user(user_id, status_id):
+def get_user_status(user_id, status_id):
     """ Get a given status by a given user. """
     # TODO: Test this...
     user = None
@@ -328,38 +328,39 @@ def get_status_by_user(user_id, status_id):
 # Status and Profile Handlers
 # TODO REFACTOR
 
-@app.route('/new_status', methods=['POST'])
+@app.route('/status', methods=['POST'])
 @login_required
 @limiter.limit('100 per 15 minute')
-def add_status():
+def post_status():
     """ Adds a new post to the feed. """
-    if len(request.form['post-text']) > 200:
+    status = request.form['post-text']
+    if len(status) > 200:
         return redirect(url_for('home', error='Too many characters'))
-
-    fu.add_post({
-        'description': request.form['post-text'],
-        'pubdate': datetime.now(pytz.utc),
-        'guid': str(uuid.uuid4().int),
-        'language': fr.get_user_language()
-    })
+    elif status != '':
+        fu.add_post({
+            'description': request.form['post-text'],
+            'pubdate': datetime.now(pytz.utc),
+            'guid': str(uuid.uuid4().int),
+            'language': fr.get_user_language()
+        })
     return redirect(url_for('home'))
 
 
-@app.route('/add_follow', methods=['POST'])
+@app.route('/follow', methods=['POST'])
 @login_required
 @limiter.limit('50 per 15 minutes')
-def add_follow():
+def post_follow():
     """ Adds a new follow to the user's list. """
     user_link = request.form['follow-url']
-    print user_link
-    # Using the link given by the user, tell the
-    # crawler to get the rest of the info.
-    user_info = OnDemandCrawler().get_all_items([user_link])
+    if user_link != '':
+        # Using the link given by the user, tell the
+        # crawler to get the rest of the info.
+        user_info = OnDemandCrawler().get_all_items([user_link])
 
-    user_name = user_info[user_link]['info']['username']
-    user_id = user_info[user_link]['info']['user_id']
+        user_name = user_info[user_link]['info']['username']
+        user_id = user_info[user_link]['info']['user_id']
 
-    fu.add_follow_user(user_id=user_id, user_name=user_name, user_link=user_link)
+        fu.add_follow_user(user_id=user_id, user_name=user_name, user_link=user_link)
     return redirect(url_for('home'))
 
 
