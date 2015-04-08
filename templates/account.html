@@ -33,7 +33,7 @@ function saveToForm(el) {
 <!-- ==============================================================
 	 Account Settings
      ============================================================== -->
-<form method='post' action='{{ url_for("account") }}' name='account_settings_form'>
+<form method='post' action='{{ url_for("post_account") }}' name='account_settings_form'>
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h3 class='panel-title'>Account Settings</h3>
@@ -67,7 +67,7 @@ function saveToForm(el) {
 					<textarea id='bio' class="form-control" rows='4' maxlength='250' placeholder='Describe yourself!' onchange='saveToForm(this);'>{{ user['bio'] }}</textarea>
 				</div>
 			</div>
-			<button class='btn btn-primary type='submit'>Save</button>
+			<button class='btn btn-primary type='submit'>Update Profile</button>
 		</div>
 	</div>
 	<div class="panel panel-default">
@@ -84,14 +84,14 @@ function saveToForm(el) {
 					<input type='text' class="form-control" name='password_confirm' id='password_confirm' />
 				</div>
 			</div>
-			<button class='btn btn-primary type='submit'>Save</button>
+			<button class='btn btn-primary type='submit'>Change Password</button>
 		</div>
 	</div>
 </form>
 <!-- ==============================================================
 	 System Settings
      ============================================================== -->
-<form method='post' action='{{ url_for("account") }}' name='account_settings_form'>
+<form method='post' action='{{ url_for("post_account") }}' name='account_settings_form'>
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h3 class='panel-title'>System Settings</h3>
