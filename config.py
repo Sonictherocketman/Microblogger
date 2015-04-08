@@ -157,7 +157,7 @@ def main():
         conf = f.read()
     conf = conf.replace('{{WSGI_USER}}', user)\
             .replace('{{WSGI_STATIC_DIR}}', location + 'static')\
-            .replace('{{WSGI_FEED_DIR}}', locaiton + 'feed')\
+            .replace('{{WSGI_FEED_DIR}}', location + 'feed')\
             .replace('{{WSGI_DIR}}', location)\
             .replace('{{WSGI_FILE_LOCATION}}', location + 'microblogger.wsgi')\
             .replace('{{ADMIN_EMAIL}}', email)\
