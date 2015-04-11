@@ -29,7 +29,7 @@ from crontab import CronTab
 
 # Configuration
 CACHE = '/tmp/microblog/'
-SETTINGS = '~{0}/.microblogger_settings.json'
+SETTINGS = '{0}.microblogger_settings.json'
 ROOT_DIR = '/var/www/microblogger/'
 DEFAULT_TIMELINE_SIZE = 25
 MAX_FILE_SIZE_BYTES = 500000
@@ -97,7 +97,7 @@ def main():
     Creating caches...
     '''
 
-    # Get everything going.
+    # Add the user's path to the settings file.
     global SETTINGS
     SETTINGS = os.path.expanduser(SETTINGS.format(user))
     CacheManager.create_cache(CACHE)
