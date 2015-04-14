@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 """ Reads values from the user's feed. """
 
+import time
+
 from lxml import etree
 from dateutil.parser import parse
 
 import util as u
 import post
+from settingsmanager import SettingsManager
 
 
 # User Functions
