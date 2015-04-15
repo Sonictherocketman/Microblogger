@@ -85,6 +85,9 @@ class NoSuchUserError(Exception):
     pass
 
 
+class RemoteUserPropertyError(Exception):
+    pass
+
 class User(object):
     """ A representation of a given microblog user.
 
@@ -116,8 +119,8 @@ class User(object):
             self._rel_location = local_url
         elif isinstance(remote_url, str):
             """ Create new remote user with feed @ location. """
-            # TODO: Unimplemented
-            pass
+            self._status = DataLocations.REMOTE
+            self._feed_url = remote_url
 
     def _generate_new_user_feed(location='user/feed.xml', username='', user_ud='',):
         """ Creates a blank XML feed and writes it. To fill in the
@@ -182,6 +185,9 @@ class User(object):
         """ Fetches the given attr based on the user's status. """
         if self._status == DataLocations.LOCAL:
             return _get_from_feed(self._rel_location, xpath)
+        elif self._status == DataLocations.REMOTE:
+            # TODO Implement Crawler Backed Attrs
+            pass
         else:
             return self.__dict__.get(attr)
 
@@ -190,6 +196,8 @@ class User(object):
         local user, then that user's cached values are updated. """
         if self._status == DataLocations.LOCAL:
             _set_to_feed(self._rel_location, xpath, value)
+        elif self._status == DataLocations.REMOTE:
+            raise RemoteUserPropertyError
         else:
             self.__dict__[attr] = value
 
@@ -250,6 +258,7 @@ class User(object):
         feed = u.get_user_feed('user/follows.xml')
         follows = []
         follows_el = feed.xpath('//channel/item')
+        s4
         if not len(follows_el) > 0:
             return list()
 
@@ -317,7 +326,7 @@ class User(object):
         return self._get_attr('docs', '//channel/docs')
 
     @docs_url.setter
-    def docs_url(url):
+    def docs_url(self, url):
         self._set_attr('docs', '//channel/docs', url)
 
     @property
@@ -335,6 +344,15 @@ class User(object):
     @last_build_date.setter
     def last_build_date(self, last_build_date):
         self._set_attr('last_build_date', '//channel/lastBuildDate', last_build_date)
+
+    @property
+    def relocate_url(self):
+        return self._get_attr('relocate', '//channel/relocate')
+
+    @relocate_url.setter
+    def relocate_url(self, url):
+        self._set_attr('relocate', '//channel/relocate', url)
+
 
     ################ Methods ##################
     # TODO: REFACTOR EVERYTHING IN User BELOW THIS POINT
@@ -453,20 +471,4 @@ class User(object):
         stati = [post.post(status) for status in tree.xpath('//item')]
         stati.sort(key=lambda x: parse(x['pubdate']), reverse=True)
         return stati[:n]
-
-    # Misc
-
-    def relocate_to(url):
-        """ Signals to the user's followers to discard the main feed
-        redirect to the given URL. This will cause the user's current
-        feed to be considered dead.
-
-        Use with caution. """
-        feed = u.get_user_feed('user/feed.xml')
-        element = E.relocate(url)
-        channel = feed.xpath('//channel')
-        channel.append(element)
-        _write_to_feed(feed, 'user/feed.xml')
-
-
 

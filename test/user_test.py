@@ -24,13 +24,17 @@ class UserTest(unittest.TestCase):
         some_dict = { 'some_key': 'some_value' }
         self.assertEqual(User(entries=some_dict)._status, dl.CACHED)
 
+    def test_remote_user_init(self):
+        some_url = 'http://somedomain.tld/feed'
+        self.assertEqual(User(remote_url=some_url)._status, dl.REMOTE)
+
     def test_local_user_init(self):
         self.assertEqual(User(local_url='user/feed.xml')._status, dl.LOCAL)
 
-    def test_generate_new_user_feed(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_generate_new_user_feed(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
 
     ################### Properties #######################
@@ -48,9 +52,15 @@ class UserTest(unittest.TestCase):
         self.assertEqual(user.username, username)
 
     def test_remote_username(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        username = 'spam'
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        try:
+            # Should fail.
+            user.username = username
+            self.fail('Setting a remote user should be forbidden.')
+        except:
+            pass
+        self.assertIsNotNone(user.username)
 
     def test_cached_username(self):
         username = 'graham.chapman'
@@ -76,9 +86,15 @@ class UserTest(unittest.TestCase):
         self.assertEqual(user.description, description)
 
     def test_remote_description(self):
-        # TODO: Unimplemented
-        self.fail('Unimplimented')
-        pass
+        description = 'dummy'
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        try:
+            # Should fail.
+            user.descripton = description
+            self.fail('Setting a remote user should be forbidden.')
+        except:
+            pass
+        self.assertIsNotNone(user.description)
 
     def test_cached_description(self):
         description = 'test 1, 2, 3. Is this thing on?'
@@ -104,9 +120,15 @@ class UserTest(unittest.TestCase):
         self.assertEqual(user.user_id, user_id)
 
     def test_remote_user_id(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        user_id = 'dummy'
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        try:
+            # Should fail.
+            user.user_id= user_id
+            self.fail('Setting a remote user should be forbidden.')
+        except:
+            pass
+        self.assertIsNotNone(user.user_id)
 
     def test_cached_user_id(self):
         user_id = '544533534534543534'
@@ -132,9 +154,15 @@ class UserTest(unittest.TestCase):
         self.assertEqual(user.full_name, full_name)
 
     def test_remote_full_name(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        full_name = 'dummy'
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        try:
+            # should fail.
+            user.full_name = full_name
+            self.fail('setting a remote user should be forbidden.')
+        except:
+            pass
+        self.assertIsNotNone(user.full_name)
 
     def test_cached_full_name(self):
         full_name = 'Joe Blow'
@@ -160,9 +188,15 @@ class UserTest(unittest.TestCase):
         self.assertEqual(user.link, link)
 
     def test_remote_link(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        link = 'dummy'
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        try:
+            # should fail.
+            user.link = link
+            self.fail('setting a remote user should be forbidden.')
+        except:
+            pass
+        self.assertIsNotNone(user.link)
 
     def test_cached_link(self):
         link = 'http://example.com'
@@ -266,8 +300,138 @@ class UserTest(unittest.TestCase):
         self.assertEqual(user.follows_url, follows_url)
 
 
+    # Blocks
+
+    def test_local_blocks(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    def test_remote_blocks(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    def test_cached_blocks(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    # Blocks Just Links
+
+    def test_local_blocks_just_links(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    def test_remote_blocks_just_links(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    def test_cached_blocks_just_links(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    # Blocks URL
+
+    def test_local_blocks_url(self):
+        blocks_url = 'http://example.com'
+        user = User(local_url='user/feed.xml')
+        try:
+            user.blocks_url = blocks_url
+        except Exception, e:
+            print e
+            self.fail('Setting local user blocks_url failed.')
+        self.assertEqual(user.blocks_url, blocks_url)
+
+    def test_remote_blocks_url(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    def test_cached_blocks_url(self):
+        blocks_url = 'http://example.com'
+        user = User(entries={ 'blocks_url': blocks_url })
+        blocks_url = 'http://example.net'
+        try:
+            user.blocks_url = blocks_url
+        except Exception, e:
+            print e
+            self.fail('Setting cached blocks_url failed.')
+        self.assertEqual(user.blocks_url, blocks_url)
+
+    # Docs
+
+    def test_local_docs_url(self):
+        docs_url = 'http://example.com'
+        user = User(local_url='user/feed.xml')
+        try:
+            user.docs_url = docs_url
+        except Exception, e:
+            print e
+            self.fail('Setting local user docs_url failed.')
+        self.assertEqual(user.docs_url, docs_url)
+
+    def test_remote_docs_url(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    def test_cached_docs_url(self):
+        docs_url = 'http://example.com'
+        user = User(entries={ 'docs_url': docs_url })
+        docs_url = 'http://example.net'
+        try:
+            user.docs_url = docs_url
+        except Exception, e:
+            print e
+            self.fail('Setting cached docs_url failed.')
+        self.assertEqual(user.docs_url, docs_url)
+
+    # Relocate
+
+    def test_local_relocate_url(self):
+        relocate_url = 'http://example.com'
+        user = User(local_url='user/feed.xml')
+        try:
+            user.relocate_url = relocate_url
+        except Exception, e:
+            print e
+            self.fail('Setting local user relocate_url failed.')
+        self.assertEqual(user.relocate_url, relocate_url)
+
+    def test_remote_relocate_url(self):
+        # TODO: Unimplemented
+        self.fail('Unimplemented')
+        pass
+
+    def test_cached_relocate_url(self):
+        relocate_url = 'http://example.com'
+        user = User(entries={ 'relocate_url': relocate_url })
+        relocate_url = 'http://example.net'
+        try:
+            user.relocate_url = relocate_url
+        except Exception, e:
+            print e
+            self.fail('Setting cached relocate_url failed.')
+        self.assertEqual(user.relocate_url, relocate_url)
 
 
+    ################# Methods ###################
+
+    def test_add_and_delete_post(self):
+        self.fail('Unimplemented')
+
+    def test_follow_and_unfollow_user(self):
+        self.fail('Unimplemented')
+
+    def test_block_and_unblock_user(self):
+        self.fail('Unimplemented')
+
+    ############### Timeline Stuff ################
+    # TODO
 
 
 

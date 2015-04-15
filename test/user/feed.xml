@@ -6,7 +6,7 @@
         <description>just some guy or gal... lol #NoFilter</description>
         <link>http://example.com</link>
         <profile>http://127.0.0.1:5000</profile>
-        <blocks count=""/>
+        <blocks count="">http://example.com</blocks>
         <follows count="">http://example.com</follows>
         <reply_to>
             <link>http://service.tld/reply</link>
@@ -16,7 +16,7 @@
             <reply_status_id/>
             <user_link/>
         </reply_to>
-        <docs>http://example.com/docs</docs>
+        <docs>http://example.com</docs>
         <language>http://example.com</language>
         <lastBuildDate/>
 <item><guid>213310573851215529614522650235796765742</guid><pubdate>Thu, 12 Mar 2015 05:33:41 +0000</pubdate><description>PLEASE WORK!</description><language>en</language></item>
