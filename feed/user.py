@@ -12,6 +12,68 @@ import util as u
 from settingsmanager import SettingsManager
 
 
+# Misc Utilities
+
+
+def _get_from_feed(rel_location, xpath):
+    """ Gets a given attr from the feed at the location. """
+    feed = u.get_user_feed(rel_location)
+    return feed.xpath(xpath)[0].text
+
+
+def _set_to_feed(rel_location, xpath, value):
+    """ Sets a value to the node at the xpath in the file given. """
+    feed = u.get_user_feed(rel_location)
+    element = feed.xpath(xpath)
+    if element:
+        element[0].text = value
+    u.write_user_feed(feed, rel_location)
+
+
+def _write_to_feed(tree, rel_location):
+    """ Writes the given tree to the location given. If pagination
+    is required, then it will paginate the files. Wraps
+    u.write_user_feed() """
+    # Check if the feed is too big. If so, make a new
+    # feed and insert it there.
+    size = u.get_user_feed_size(rel_location)
+    count = len(tree.xpath('//item'))
+    if size > SettingsManager.get('max_feed_size_bytes') \
+            or count > SettingsManager.get('max_posts_per_feed'):
+        old_feed_name = u.archive_user_feed(rel_location)
+        from lxml.builder import E
+        tree.xpath('//channel')[0].append(E.next_node(old_filename))
+    u.write_user_feed(tree, rel_location)
+
+
+def _search_recurs(rel_location, xpath_qry):
+    """ Searches the tree representation of the given file for
+    any item that meets the query string. If not found, it searches
+    the `next_node` until it succeeds or no more `next_nodes` are
+    found.
+
+    Returns a tuple (rel_file_url, guid)
+    """
+    feed = u.get_user_feed(starting_location)
+    item = feed.xpath(xpath_qry)
+    next_node = feed.xpath('//next_node')
+
+    if item:
+        return rel_location, post(item[0])['guid']
+    elif next_node:
+        new_rel_location = u.convert_url(next_node[0].text, to_relative=True)
+        _search_recurs(new_rel_location, xpath_qry)
+    else:
+        return
+
+
+def _enum(**enums):
+    return type('Enum', (), enums)
+
+
+# User Model
+
+
 DataLocations = _enum(
         LOCAL=0,
         CACHED=1,
@@ -43,14 +105,19 @@ class User(object):
     @since 2015-04-15 ONLY LOCAL AND CACHED USERS ARE SUPPORTED
     """
 
-    def __init__(self, **entries):
-        self._status = DataLocations.CACHED
-        self.__dict__.update(entries)
-
-    def __init__(self, feed_url=''):
-        self._status = DataLocations.LOCAL
-        # TODO
-        pass
+    def __init__(self, local_url=None, remote_url=None, entries=None):
+        if isinstance(entries, dict):
+            """ Create new User from dict. """
+            self._status = DataLocations.CACHED
+            self.__dict__.update(**entries)
+        elif isinstance(local_url, str):
+            """ Create new local User with feed @ location. """
+            self._status = DataLocations.LOCAL
+            self._rel_location = local_url
+        elif isinstance(remote_url, str):
+            """ Create new remote user with feed @ location. """
+            # TODO: Unimplemented
+            pass
 
     def _generate_new_user_feed(location='user/feed.xml', username='', user_ud='',):
         """ Creates a blank XML feed and writes it. To fill in the
@@ -113,7 +180,7 @@ class User(object):
 
     def _get_attr(self, attr, xpath):
         """ Fetches the given attr based on the user's status. """
-        if self._status == Status.LOCAL:
+        if self._status == DataLocations.LOCAL:
             return _get_from_feed(self._rel_location, xpath)
         else:
             return self.__dict__.get(attr)
@@ -121,8 +188,8 @@ class User(object):
     def _set_attr(self, attr, xpath, value):
         """ Sets the given attr to the value. If the user is NOT a
         local user, then that user's cached values are updated. """
-        if self._status == Status.LOCAL:
-            self._set_to_feed(self._rel_location, xpath, value)
+        if self._status == DataLocations.LOCAL:
+            _set_to_feed(self._rel_location, xpath, value)
         else:
             self.__dict__[attr] = value
 
@@ -134,23 +201,23 @@ class User(object):
 
     @username.setter
     def username(self, username):
-        self._set_attr('usernam', '//channel/username', username)
+        self._set_attr('username', '//channel/username', username)
 
     @property
     def description(self):
         return self._get_attr('description', '//channel/description')
 
     @description.setter
-    def description(self, decription):
+    def description(self, description):
         self._set_attr('description', '//channel/description', description)
 
     @property
     def user_id(self):
-        return self._get_attr('description', '//channel/description')
+        return self._get_attr('user_id', '//channel/user_id')
 
     @user_id.setter
     def user_id(self, user_id):
-        self._set_attr('description', '//channel/description')
+        self._set_attr('user_id', '//channel/user_id', user_id)
 
     @property
     def full_name(self):
@@ -174,7 +241,7 @@ class User(object):
 
     @language.setter
     def language(self, language):
-        self._set_attr('language', '//channel/language')
+        self._set_attr('language', '//channel/language', language)
 
     @property
     def follows(self):
@@ -231,7 +298,7 @@ class User(object):
         self._set_attr('blocks', '//channel/blocks', url)
 
     @property
-    def reply_to_link(self):
+    def reply_to_url(self):
         # TODO: REFACTOR
         feed = u.get_user_feed('user/feed.xml')
         return feed.xpath('channel/reply_to/link')[0].text
@@ -402,60 +469,4 @@ class User(object):
         _write_to_feed(feed, 'user/feed.xml')
 
 
-# Misc Utilities
 
-
-def _get_from_feed(rel_location, xpath):
-    """ Gets a given attr from the feed at the location. """
-    feed = u.get_user_feed(rel_location)
-    return feed.xpath(xpath)[0].text
-
-
-def _set_to_feed(rel_location, xpath, value):
-    """ Sets a value to the node at the xpath in the file given. """
-    feed = u.get_user_feed(rel_location)
-    element = feed.xpath(xpath)
-    if element:
-        element[0].text = value
-    u.write_user_feed(feed, rel_location)
-
-
-def _write_to_feed(tree, rel_location):
-    """ Writes the given tree to the location given. If pagination
-    is required, then it will paginate the files. Wraps
-    u.write_user_feed() """
-    # Check if the feed is too big. If so, make a new
-    # feed and insert it there.
-    size = u.get_user_feed_size(rel_location)
-    count = len(tree.xpath('//item'))
-    if size > SettingsManager.get('max_feed_size_bytes') \
-            or count > SettingsManager.get('max_posts_per_feed'):
-        old_feed_name = u.archive_user_feed(rel_location)
-        from lxml.builder import E
-        tree.xpath('//channel')[0].append(E.next_node(old_filename))
-    u.write_user_feed(tree, rel_location)
-
-
-def _search_recurs(rel_location, xpath_qry):
-    """ Searches the tree representation of the given file for
-    any item that meets the query string. If not found, it searches
-    the `next_node` until it succeeds or no more `next_nodes` are
-    found.
-
-    Returns a tuple (rel_file_url, guid)
-    """
-    feed = u.get_user_feed(starting_location)
-    item = feed.xpath(xpath_qry)
-    next_node = feed.xpath('//next_node')
-
-    if item:
-        return rel_location, post(item[0])['guid']
-    elif next_node:
-        new_rel_location = u.convert_url(next_node[0].text, to_relative=True)
-        _search_recurs(new_rel_location, xpath_qry)
-    else:
-        return
-
-
-def _enum(**enums):
-    return type('Enum', (), enums)
