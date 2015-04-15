@@ -82,31 +82,36 @@ DataLocations = _enum(
 
 
 def cache_users(users):
-    """ Converts the list of REMOTE or LOCAL users into CACHED
+    """ Converts the list of REMOTE users into CACHED
     users more efficently than calling user.cache_user() on
     each one individually.
     """
-    local_users = [user for user in users if user._status == DataLocations.LOCAL]
-    remote_users = [user for user in users if user._status == DataLocations.REMOTE]
-
-    # Remote users
-    if len(remote_users) > 0:
-        from crawler.crawler import OnDemandCrawler
-        user_dicts = OnDemandCrawler().get_user_info(remote_users)
-
-        for i, user_dict in enumerate(user_dicts):
-            user = remote_users[i]
-            user._status = DataLocations.CACHED
-            [setattr(user, key, value) for key, value in user_dict]
+    import inspect
+    from crawler.crawler import OnDemandCrawler
+    remote_links = [user._feed_url for user in users]
+    # TODO Fix this!
+    #user_dicts = OnDemandCrawler().get_user_info(remote_links)
+    #
+    #for i, user_dict in enumerate(user_dicts):
+    #    user_methods = inspect.getmembers(user, predicate=inspect.ismethod)
+    #    user._status = DataLocations.CACHED
+    #    for key, value in user_dict.iteritems():
+    #        for name, method in user_methods:
+    #            is_setter = name[0:2] == 'set'
+    #            is_bound_to_key = method.__dict__.get('binding') == key
+    #            if is_setter and is_bound_to_key:
+    #                print 'calling ' + name
+    #                method(value)
+    #                break
 
     # Local Users
-    if len(local_users) > 0:
-        property_names = [p for p in dir(User) if isinstance(getattr(User, p), property)]
-        user_dict = { prop: getattr(self, prop) for prop in property_names }
-
-        for user in local_users:
-            user._status = DataLocations.CACHED
-            [setattr(user, key, value) for key, value in user_dict]
+    #if len(local_users) > 0:
+    #    user_methods = inspect.getmembers(user, predicate=inspect.ismethod)
+    #    user_dict = { prop: getattr(self, prop) for prop in property_bindings }
+    #
+    #    for user in local_users:
+    #        user._status = DataLocations.CACHED
+    #        [setattr(user, key, value) for key, value in user_dict]
 
 
 class NoSuchUserError(Exception):
@@ -270,53 +275,91 @@ class User(object):
 
     ############# Properties ##############
 
-    @property
-    def username(self):
-        return self._get_attr('username', '//channel/username')
+    # Username
 
-    @username.setter
-    def username(self, username):
-        self._set_attr('username', '//channel/username', username)
+    def get_username(self):
+        return self._get_attr(self.get_username.__dict__['binding'],
+                '//channel/username')
+    get_username.__dict__['binding'] = 'username'
 
-    @property
-    def description(self):
-        return self._get_attr('description', '//channel/description')
+    def set_username(self, username):
+        self._set_attr(self.set_username.__dict__['binding'],
+                '//channel/username', username)
+    set_username.__dict__['binding'] = 'username'
 
-    @description.setter
-    def description(self, description):
-        self._set_attr('description', '//channel/description', description)
+    username = property(get_username, set_username)
 
-    @property
-    def user_id(self):
-        return self._get_attr('user_id', '//channel/user_id')
+    # Description
 
-    @user_id.setter
-    def user_id(self, user_id):
-        self._set_attr('user_id', '//channel/user_id', user_id)
+    def get_description(self):
+        return self._get_attr(self.get_description.__dict__['binding'],
+                '//channel/description')
+    get_description.__dict__['binding'] = 'description'
 
-    @property
-    def full_name(self):
-        return self._get_attr('user_full_name', '//channel/user_full_name')
+    def set_description(self, description):
+        self._set_attr(self.set_description.__dict__['binding'],
+                '//channel/description', description)
+    set_description.__dict__['binding'] = 'description'
 
-    @full_name.setter
-    def full_name(self, full_name):
-        self._set_attr('user_full_name', '//channel/user_full_name', full_name)
+    description = property(get_description, set_description)
 
-    @property
-    def link(self):
-        return self._get_attr('link', '//channel/link')
+    # User_id
 
-    @link.setter
-    def link(self, link):
-        self._set_attr('link', '//channel/link', link)
+    def get_user_id(self):
+        return self._get_attr(self.get_user_id.__dict__['binding'],
+                '//channel/user_id')
+    get_user_id.__dict__['binding'] = 'user_id'
 
-    @property
-    def language(self):
-        return self._get_attr('language', '//channel/language')
+    def set_user_id(self, user_id):
+        self._set_attr(self.get_user_id.__dict__['binding'],
+                '//channel/user_id', user_id)
+    set_user_id.__dict__['binding'] = 'user_id'
 
-    @language.setter
-    def language(self, language):
-        self._set_attr('language', '//channel/language', language)
+    user_id = property(get_user_id, set_user_id)
+
+    # Full Name
+
+    def get_full_name(self):
+        return self._get_attr(self.get_full_name.__dict__['binding'],
+                '//channel/user_full_name')
+    get_full_name.__dict__['binding'] = 'user_full_name'
+
+    def set_full_name(self, full_name):
+        self._set_attr(self.set_full_name.__dict__['binding'],
+                '//channel/user_full_name', full_name)
+    set_full_name.__dict__['binding'] = 'user_full_name'
+
+    full_name = property(get_full_name, set_full_name)
+
+    # Link
+
+    def get_link(self):
+        return self._get_attr(self.get_link.__dict__['binding'],
+                '//channel/link')
+    get_link.__dict__['binding'] = 'link'
+
+    def set_link(self, link):
+        self._set_attr(self.set_link.__dict__['binding'],
+                '//channel/link', link)
+    set_link.__dict__['binding'] = 'link'
+
+    link = property(get_link, set_link)
+
+    # Language
+
+    def get_language(self):
+        return self._get_attr(self.get_language.__dict__['binding'],
+                '//channel/language')
+    get_language.__dict__['binding'] = 'language'
+
+    def set_language(self, language):
+        self._set_attr(self.set_language.__dict__['binding'],
+                '//channel/language', language)
+    set_language.__dict__['binding'] = 'language'
+
+    language = property(get_language, set_language)
+
+    # Follows
 
     @property
     def follows(self):
@@ -340,13 +383,21 @@ class User(object):
         Basically a simplified version of get_user_follows. """
         return [user.link for user in self.follows]
 
-    @property
-    def follows_url(self):
-        return self._get_attr('follows', '//channel/follows')
+    # Follows Url
 
-    @follows_url.setter
-    def follows_url(self, url):
-        self._set_attr('follows', '//channel/follows', url)
+    def get_follows_url(self):
+        return self._get_attr(self.get_follows_url.__dict__['binding'],
+                '//channel/follows')
+    get_follows_url.__dict__['binding'] = 'follows'
+
+    def set_follows_url(self, url):
+        self._set_attr(self.set_follows_url.__dict__['binding'],
+                '//channel/follows', url)
+    set_follows_url.__dict__['binding'] = 'follows'
+
+    follows_url = property(get_follows_url, set_follows_url)
+
+    # Blocks
 
     @property
     def blocks(self):
@@ -365,63 +416,97 @@ class User(object):
     def blocks_just_links(self):
         return [user.link for user in self.blocks]
 
-    @property
-    def blocks_url(self):
-        return self._get_attr('blocks', '//channel/blocks')
+    # Blocks Url
 
-    @blocks_url.setter
-    def blocks_url(self, url):
-        self._set_attr('blocks', '//channel/blocks', url)
+    def get_blocks_url(self):
+        return self._get_attr(self.get_blocks_url.__dict__['binding'],
+                '//channel/blocks')
+    get_blocks_url.__dict__['binding'] = 'blocks'
 
-    @property
-    def reply_to_url(self):
+    def set_blocks_url(self, url):
+        self._set_attr(self.set_blocks_url.__dict__['binding'],
+                '//channel/blocks', url)
+    set_blocks_url.__dict__['binding'] = 'blocks'
+
+    blocks_url = property(get_blocks_url, set_blocks_url)
+
+    # Reply To
+
+    def get_reply_to_url(self):
         # TODO: REFACTOR
         feed = u.get_user_feed('user/feed.xml')
         return feed.xpath('channel/reply_to/link')[0].text
+    get_reply_to_url.__dict__['binding'] = 'reply_to'
 
-    @reply_to_url.setter
-    def reply_to_url(self, url):
+    def set_reply_to_url(self, url):
         # TODO: REFACTOR
         feed = u.get_user_feed('user/feed.xml')
         reply_to_link_element = feed.xpath('/channel/reply_to/link')
         if reply_to_link_element:
             reply_to_link_element[0].text = url
         u.write_user_feed(feed, 'user/feed.xml')
+    set_reply_to_url.__dict__['binding'] = 'reply_to'
 
-    @property
-    def docs_url(self):
-        return self._get_attr('docs', '//channel/docs')
+    reply_to_url = property(get_reply_to_url, set_reply_to_url)
 
-    @docs_url.setter
-    def docs_url(self, url):
-        self._set_attr('docs', '//channel/docs', url)
+    # Docs
 
-    @property
-    def next_node(self):
-        return self._get_attr('next_node', '//channel/next_node')
+    def get_docs_url(self):
+        return self._get_attr(self.get_docs_url.__dict__['binding'],
+                '//channel/docs')
+    get_docs_url.__dict__['binding'] = 'docs'
 
-    @next_node.setter
-    def next_node(self, next_node):
-        self._set_attr('next_node', '//channel/next_node', next_node)
+    def set_docs_url(self, url):
+        self._set_attr(self.get_docs_url.__dict__['binding'],
+                '//channel/docs', url)
+    set_docs_url.__dict__['binding'] = 'docs'
 
-    @property
-    def last_build_date(self):
-        return self._get_attr('last_build_date', '//channel/lastBuildDate')
+    docs_url = property(get_docs_url, set_docs_url)
 
-    @last_build_date.setter
-    def last_build_date(self, last_build_date):
-        self._set_attr('last_build_date', '//channel/lastBuildDate', last_build_date)
+    # Next Node
+
+    def get_next_node(self):
+        return self._get_attr(self.get_next_node.__dict__['binding'],
+                '//channel/next_node')
+    get_next_node.__dict__['binding'] = 'next_node'
+
+    def set_next_node(self, next_node):
+        self._set_attr(self.set_next_node.__dict__['binding'],
+                '//channel/next_node', next_node)
+    set_next_node.__dict__['binding'] = 'next_node'
+
+    next_node = property(get_next_node, set_next_node)
+
+    # Last Build Date
+
+    def get_last_build_date(self):
+        return self._get_attr(get_last_build_date.__dict__['binding'],
+                '//channel/lastBuildDate')
+    get_last_build_date.__dict__['binding'] = 'lastBuildDate'
+
+    def set_last_build_date(self, last_build_date):
+        self._set_attr(self.set_last_build_date.__dict__['binding'],
+                '//channel/lastBuildDate', last_build_date)
+    set_last_build_date.__dict__['binding'] = 'lastBuildDate'
+
+    last_build_date = property(get_last_build_date, set_last_build_date)
+
+    # Relocate
 
     # TODO: Relocate setter should insert a new element instead of jsut setting
     # This is because the element should only exist if the relocate is filled.
 
-    @property
-    def relocate_url(self):
-        return self._get_attr('relocate', '//channel/relocate')
+    def get_relocate_url(self):
+        return self._get_attr(self.get_relocate_url.__dict__['binding'],
+                '//channel/relocate')
+    get_relocate_url.__dict__['binding'] = 'relocate'
 
-    @relocate_url.setter
-    def relocate_url(self, url):
-        self._set_attr('relocate', '//channel/relocate', url)
+    def set_relocate_url(self, url):
+        self._set_attr(self.set_last_build_date.__dict__['binding'],
+                '//channel/relocate', url)
+    set_relocate_url.__dict__['binding'] = 'relocate'
+
+    relocate = property(get_relocate_url, set_relocate_url)
 
 
     ################ Methods ##################

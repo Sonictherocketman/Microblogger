@@ -67,12 +67,15 @@ class OnDemandCrawler(FeedCrawler):
         return self._data
 
     def get_user_info(self, links, deep_traverse=False):
-        """ Returns a list of tuples of all of the profiles of the given users. """
+        """ Returns a list of all of the profiles of the given users. """
         self._deep_traverse = deep_traverse
         for link in links:
             self._data[link] = []
         self.start(links)
-        return [(link, self._data[link]['user']) for link in links]
+        return [self._data[link][0]['user'] for link in links]
+
+    def on_error(self, error):
+        print error
 
     def on_finish(self):
         """ Stops the crawler. """
