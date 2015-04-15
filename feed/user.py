@@ -81,12 +81,49 @@ DataLocations = _enum(
         )
 
 
+def cache_users(users):
+    """ Converts the list of REMOTE or LOCAL users into CACHED
+    users more efficently than calling user.cache_user() on
+    each one individually.
+    """
+    local_users = [user for user in users if user._status == DataLocations.LOCAL]
+    remote_users = [user for user in users if user._status == DataLocations.REMOTE]
+
+    # Remote users
+    if len(remote_users) > 0:
+        from crawler.crawler import OnDemandCrawler
+        user_dicts = OnDemandCrawler().get_user_info(remote_users)
+
+        for i, user_dict in enumerate(user_dicts):
+            user = remote_users[i]
+            user._status = DataLocations.CACHED
+            [setattr(user, key, value) for key, value in user_dict]
+
+    # Local Users
+    if len(local_users) > 0:
+        property_names = [p for p in dir(User) if isinstance(getattr(User, p), property)]
+        user_dict = { prop: getattr(self, prop) for prop in property_names }
+
+        for user in local_users:
+            user._status = DataLocations.CACHED
+            [setattr(user, key, value) for key, value in user_dict]
+
+
 class NoSuchUserError(Exception):
+    """ Signifies that the desired user does not exist. """
     pass
 
 
 class RemoteUserPropertyError(Exception):
+    """ Occurs when trying to set the properties of a REMOTE user. """
     pass
+
+
+class UserNotBackedError(Exception):
+    """ Signifies that a temp user is being purged and the user has
+    no backing feed. """
+    pass
+
 
 class User(object):
     """ A representation of a given microblog user.
@@ -108,7 +145,7 @@ class User(object):
     @since 2015-04-15 ONLY LOCAL AND CACHED USERS ARE SUPPORTED
     """
 
-    def __init__(self, local_url=None, remote_url=None, entries=None):
+    def __init__(self, local_url=None, remote_url=None, entries=None, force_cache=False):
         if isinstance(entries, dict):
             """ Create new User from dict. """
             self._status = DataLocations.CACHED
@@ -117,10 +154,12 @@ class User(object):
             """ Create new local User with feed @ location. """
             self._status = DataLocations.LOCAL
             self._rel_location = local_url
+            if force_cache: self._cache_user()
         elif isinstance(remote_url, str):
             """ Create new remote user with feed @ location. """
             self._status = DataLocations.REMOTE
             self._feed_url = remote_url
+            if force_cache: self._cache_user()
 
     def _generate_new_user_feed(location='user/feed.xml', username='', user_ud='',):
         """ Creates a blank XML feed and writes it. To fill in the
@@ -179,17 +218,20 @@ class User(object):
                 )
         u.write_user_feed(feed, location)
 
-    ############# Behind the Curtain ##############
+    ############# Behind the Curtain ################
 
     def _get_attr(self, attr, xpath):
-        """ Fetches the given attr based on the user's status. """
+        """ Fetches the given attr based on the user's status.
+
+        If a user is remote, then the user will first be fully
+        cached before a result is returned. From that point on
+        the user's cached values will be used (unless cleared).
+        """
         if self._status == DataLocations.LOCAL:
             return _get_from_feed(self._rel_location, xpath)
         elif self._status == DataLocations.REMOTE:
-            # TODO Implement Crawler Backed Attrs
-            pass
-        else:
-            return self.__dict__.get(attr)
+            self.cache_user()
+        return self.__dict__.get(attr)
 
     def _set_attr(self, attr, xpath, value):
         """ Sets the given attr to the value. If the user is NOT a
@@ -200,6 +242,31 @@ class User(object):
             raise RemoteUserPropertyError
         else:
             self.__dict__[attr] = value
+
+    ################# Caching ###################
+
+    def cache_user(self):
+        """ Given a remote, or local user, converts them into a cached user.
+
+        To convert multiple users at once use {@code cache_users()}
+        @see cache_users
+        """
+        cache_users([self])
+
+    def invalidate_cached_user(self):
+        """ Drops the user's cached data and sets the user back to either REMOTE
+        or LOCAL depending on the initial configuration. If the user is only cached
+        then raises UserNotBackedError.
+        """
+        if self._status == DataLocations.CACHED:
+            if getattr(self, '_rel_location', None) is not None:
+                # TODO Dump props
+                self._status = DataLocations.LOCAL
+            elif getattr(self, '_feed_url', None) is not None:
+                # TODO Dump props
+                self._status = DataLocations.REMOTE
+            else:
+                raise UserNotBackedError
 
     ############# Properties ##############
 
@@ -344,6 +411,9 @@ class User(object):
     @last_build_date.setter
     def last_build_date(self, last_build_date):
         self._set_attr('last_build_date', '//channel/lastBuildDate', last_build_date)
+
+    # TODO: Relocate setter should insert a new element instead of jsut setting
+    # This is because the element should only exist if the relocate is filled.
 
     @property
     def relocate_url(self):
