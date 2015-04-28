@@ -9,6 +9,7 @@ from cachemanager import CacheManager
 import time
 from dateutil.parser import parse
 
+
 class MicroblogFeedCrawler(FeedCrawler):
     """ A basic subclass of the microblogcrawler. """
 
@@ -26,19 +27,12 @@ class MicroblogFeedCrawler(FeedCrawler):
         # Call the superclass init.
         FeedCrawler.__init__(self, links, start_now=start_now, deep_traverse=deep_traverse)
 
-    def on_start(self):
-        """ Refresh the follows list and the blocks list. """
-        pass
-
-    def on_finish(self):
-        """ Handle end of crawling process. """
-        pass
-
     def on_item(self, link, info, item):
         """ Store new items in the cache. """
         item['user'] = info
         CacheManager.add_to_timeline(item)
         print item['description'] + '\n'
+
 
 class OnDemandCrawler(FeedCrawler):
     """ A crawler that returns the data for each
@@ -74,12 +68,13 @@ class OnDemandCrawler(FeedCrawler):
         self.start(links)
         return [self._data[link][0]['user'] for link in links]
 
-    def on_error(self, error):
-        print error
-
     def on_finish(self):
         """ Stops the crawler. """
-        self.stop()
+        self.stop(now=True)
+
+
+    def on_error(self, link, error):
+        pass
 
     def on_item(self, link, info, new_item):
         """ Add the item field to the link's dict. """

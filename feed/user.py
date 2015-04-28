@@ -89,20 +89,19 @@ def cache_users(users):
     import inspect
     from crawler.crawler import OnDemandCrawler
     remote_links = [user._feed_url for user in users]
-    # TODO Fix this!
-    #user_dicts = OnDemandCrawler().get_user_info(remote_links)
-    #
-    #for i, user_dict in enumerate(user_dicts):
-    #    user_methods = inspect.getmembers(user, predicate=inspect.ismethod)
-    #    user._status = DataLocations.CACHED
-    #    for key, value in user_dict.iteritems():
-    #        for name, method in user_methods:
-    #            is_setter = name[0:2] == 'set'
-    #            is_bound_to_key = method.__dict__.get('binding') == key
-    #            if is_setter and is_bound_to_key:
-    #                print 'calling ' + name
-    #                method(value)
-    #                break
+    user_dicts = OnDemandCrawler().get_user_info(remote_links)
+
+    for i, user_dict in enumerate(user_dicts):
+        user_methods = inspect.getmembers(user, predicate=inspect.ismethod)
+        user._status = DataLocations.CACHED
+        for key, value in user_dict.iteritems():
+            for name, method in user_methods:
+                is_setter = name[0:2] == 'set'
+                is_bound_to_key = method.__dict__.get('binding') == key
+                if is_setter and is_bound_to_key:
+                    print 'calling ' + name
+                    method(value)
+                    break
 
     # Local Users
     #if len(local_users) > 0:

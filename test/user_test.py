@@ -42,15 +42,13 @@ class UserTest(unittest.TestCase):
         user = User(remote_url='http://microblog.brianschrader.com/feed')
         user.cache_user()
         self.assertEqual(user._status, dl.CACHED)
-        self.assertEqual(user.username, 'sonicrocketman')
+        self.assertEqual()
 
     def test_cache_users(self):
-        pass
+        self.fail('Unimplemented')
 
     def test_invalidate_cached_user(self):
-        pass
-
-
+        self.fail('Unimplemented')
 
     ################### Properties #######################
 
