@@ -86,22 +86,27 @@ def cache_users(users):
     users more efficently than calling user.cache_user() on
     each one individually.
     """
+    # Fetch the data from the user's feed.
     import inspect
     from crawler.crawler import OnDemandCrawler
     remote_links = [user._feed_url for user in users]
-    user_dicts = OnDemandCrawler().get_user_info(remote_links)
-
-    for i, user_dict in enumerate(user_dicts):
-        user_methods = inspect.getmembers(user, predicate=inspect.ismethod)
-        user._status = DataLocations.CACHED
-        for key, value in user_dict.iteritems():
-            for name, method in user_methods:
-                is_setter = name[0:2] == 'set'
-                is_bound_to_key = method.__dict__.get('binding') == key
-                if is_setter and is_bound_to_key:
-                    print 'calling ' + name
-                    method(value)
-                    break
+    crawler = OnDemandCrawler()
+    user_dicts = crawler.get_user_info(remote_links)
+    # Set the data from the feed to the user's properties.
+    for user in users:
+        for i, user_dict in enumerate(user_dicts):
+            user_methods = inspect.getmembers(User, predicate=inspect.ismethod)
+            user._status = DataLocations.CACHED
+            for key, value in user_dict.iteritems():
+                for name, method in user_methods:
+                    is_setter = name[0:3] == 'set'
+                    is_bound_to_key = False
+                    try:
+                        is_bound_to_key = method.binding == key
+                    except AttributeError as e:
+                        pass
+                    if is_setter and is_bound_to_key:
+                        method(user, value)
 
     # Local Users
     #if len(local_users) > 0:
@@ -277,84 +282,84 @@ class User(object):
     # Username
 
     def get_username(self):
-        return self._get_attr(self.get_username.__dict__['binding'],
+        return self._get_attr(self.get_username.binding,
                 '//channel/username')
-    get_username.__dict__['binding'] = 'username'
+    get_username.binding = 'username'
 
     def set_username(self, username):
-        self._set_attr(self.set_username.__dict__['binding'],
+        self._set_attr(self.set_username.binding,
                 '//channel/username', username)
-    set_username.__dict__['binding'] = 'username'
+    set_username.binding = 'username'
 
     username = property(get_username, set_username)
 
     # Description
 
     def get_description(self):
-        return self._get_attr(self.get_description.__dict__['binding'],
+        return self._get_attr(self.get_description.binding,
                 '//channel/description')
-    get_description.__dict__['binding'] = 'description'
+    get_description.binding = 'description'
 
     def set_description(self, description):
-        self._set_attr(self.set_description.__dict__['binding'],
+        self._set_attr(self.set_description.binding,
                 '//channel/description', description)
-    set_description.__dict__['binding'] = 'description'
+    set_description.binding = 'description'
 
     description = property(get_description, set_description)
 
     # User_id
 
     def get_user_id(self):
-        return self._get_attr(self.get_user_id.__dict__['binding'],
+        return self._get_attr(self.get_user_id.binding,
                 '//channel/user_id')
-    get_user_id.__dict__['binding'] = 'user_id'
+    get_user_id.binding = 'user_id'
 
     def set_user_id(self, user_id):
-        self._set_attr(self.get_user_id.__dict__['binding'],
+        self._set_attr(self.get_user_id.binding,
                 '//channel/user_id', user_id)
-    set_user_id.__dict__['binding'] = 'user_id'
+    set_user_id.binding = 'user_id'
 
     user_id = property(get_user_id, set_user_id)
 
     # Full Name
 
     def get_full_name(self):
-        return self._get_attr(self.get_full_name.__dict__['binding'],
+        return self._get_attr(self.get_full_name.binding,
                 '//channel/user_full_name')
-    get_full_name.__dict__['binding'] = 'user_full_name'
+    get_full_name.binding = 'user_full_name'
 
     def set_full_name(self, full_name):
-        self._set_attr(self.set_full_name.__dict__['binding'],
+        self._set_attr(self.set_full_name.binding,
                 '//channel/user_full_name', full_name)
-    set_full_name.__dict__['binding'] = 'user_full_name'
+    set_full_name.binding = 'user_full_name'
 
     full_name = property(get_full_name, set_full_name)
 
     # Link
 
     def get_link(self):
-        return self._get_attr(self.get_link.__dict__['binding'],
+        return self._get_attr(self.get_link.binding,
                 '//channel/link')
-    get_link.__dict__['binding'] = 'link'
+    get_link.binding = 'link'
 
     def set_link(self, link):
-        self._set_attr(self.set_link.__dict__['binding'],
+        self._set_attr(self.set_link.binding,
                 '//channel/link', link)
-    set_link.__dict__['binding'] = 'link'
+    set_link.binding = 'link'
 
     link = property(get_link, set_link)
 
     # Language
 
     def get_language(self):
-        return self._get_attr(self.get_language.__dict__['binding'],
+        return self._get_attr(self.get_language.binding,
                 '//channel/language')
-    get_language.__dict__['binding'] = 'language'
+    get_language.binding = 'language'
 
     def set_language(self, language):
-        self._set_attr(self.set_language.__dict__['binding'],
+        self._set_attr(self.set_language.binding,
                 '//channel/language', language)
-    set_language.__dict__['binding'] = 'language'
+    set_language.binding = 'language'
 
     language = property(get_language, set_language)
 
@@ -367,13 +372,12 @@ class User(object):
         feed = u.get_user_feed('user/follows.xml')
         follows = []
         follows_el = feed.xpath('//channel/item')
-        s4
         if not len(follows_el) > 0:
             return list()
 
         for user_el in follows_el:
             user_dict = post._recursive_dict(user_el)[1]
-            follows.append(User(**user_dict))
+            follows.append(User(entries=user_dict))
         return follows
 
     @property
@@ -385,14 +389,14 @@ class User(object):
     # Follows Url
 
     def get_follows_url(self):
-        return self._get_attr(self.get_follows_url.__dict__['binding'],
+        return self._get_attr(self.get_follows_url.binding,
                 '//channel/follows')
-    get_follows_url.__dict__['binding'] = 'follows'
+    get_follows_url.binding = 'follows'
 
     def set_follows_url(self, url):
-        self._set_attr(self.set_follows_url.__dict__['binding'],
+        self._set_attr(self.set_follows_url.binding,
                 '//channel/follows', url)
-    set_follows_url.__dict__['binding'] = 'follows'
+    set_follows_url.binding = 'follows'
 
     follows_url = property(get_follows_url, set_follows_url)
 
@@ -418,14 +422,14 @@ class User(object):
     # Blocks Url
 
     def get_blocks_url(self):
-        return self._get_attr(self.get_blocks_url.__dict__['binding'],
+        return self._get_attr(self.get_blocks_url.binding,
                 '//channel/blocks')
-    get_blocks_url.__dict__['binding'] = 'blocks'
+    get_blocks_url.binding = 'blocks'
 
     def set_blocks_url(self, url):
-        self._set_attr(self.set_blocks_url.__dict__['binding'],
+        self._set_attr(self.set_blocks_url.binding,
                 '//channel/blocks', url)
-    set_blocks_url.__dict__['binding'] = 'blocks'
+    set_blocks_url.binding = 'blocks'
 
     blocks_url = property(get_blocks_url, set_blocks_url)
 
@@ -435,7 +439,7 @@ class User(object):
         # TODO: REFACTOR
         feed = u.get_user_feed('user/feed.xml')
         return feed.xpath('channel/reply_to/link')[0].text
-    get_reply_to_url.__dict__['binding'] = 'reply_to'
+    get_reply_to_url.binding = 'reply_to'
 
     def set_reply_to_url(self, url):
         # TODO: REFACTOR
@@ -444,49 +448,49 @@ class User(object):
         if reply_to_link_element:
             reply_to_link_element[0].text = url
         u.write_user_feed(feed, 'user/feed.xml')
-    set_reply_to_url.__dict__['binding'] = 'reply_to'
+    set_reply_to_url.binding = 'reply_to'
 
     reply_to_url = property(get_reply_to_url, set_reply_to_url)
 
     # Docs
 
     def get_docs_url(self):
-        return self._get_attr(self.get_docs_url.__dict__['binding'],
+        return self._get_attr(self.get_docs_url.binding,
                 '//channel/docs')
-    get_docs_url.__dict__['binding'] = 'docs'
+    get_docs_url.binding = 'docs'
 
     def set_docs_url(self, url):
-        self._set_attr(self.get_docs_url.__dict__['binding'],
+        self._set_attr(self.get_docs_url.binding,
                 '//channel/docs', url)
-    set_docs_url.__dict__['binding'] = 'docs'
+    set_docs_url.binding = 'docs'
 
     docs_url = property(get_docs_url, set_docs_url)
 
     # Next Node
 
     def get_next_node(self):
-        return self._get_attr(self.get_next_node.__dict__['binding'],
+        return self._get_attr(self.get_next_node.binding,
                 '//channel/next_node')
-    get_next_node.__dict__['binding'] = 'next_node'
+    get_next_node.binding = 'next_node'
 
     def set_next_node(self, next_node):
-        self._set_attr(self.set_next_node.__dict__['binding'],
+        self._set_attr(self.set_next_node.binding,
                 '//channel/next_node', next_node)
-    set_next_node.__dict__['binding'] = 'next_node'
+    set_next_node.binding = 'next_node'
 
     next_node = property(get_next_node, set_next_node)
 
     # Last Build Date
 
     def get_last_build_date(self):
-        return self._get_attr(get_last_build_date.__dict__['binding'],
+        return self._get_attr(get_last_build_date.binding,
                 '//channel/lastBuildDate')
-    get_last_build_date.__dict__['binding'] = 'lastBuildDate'
+    get_last_build_date.binding = 'lastBuildDate'
 
     def set_last_build_date(self, last_build_date):
-        self._set_attr(self.set_last_build_date.__dict__['binding'],
+        self._set_attr(self.set_last_build_date.binding,
                 '//channel/lastBuildDate', last_build_date)
-    set_last_build_date.__dict__['binding'] = 'lastBuildDate'
+    set_last_build_date.binding = 'lastBuildDate'
 
     last_build_date = property(get_last_build_date, set_last_build_date)
 
@@ -496,14 +500,14 @@ class User(object):
     # This is because the element should only exist if the relocate is filled.
 
     def get_relocate_url(self):
-        return self._get_attr(self.get_relocate_url.__dict__['binding'],
+        return self._get_attr(self.get_relocate_url.binding,
                 '//channel/relocate')
-    get_relocate_url.__dict__['binding'] = 'relocate'
+    get_relocate_url.binding = 'relocate'
 
     def set_relocate_url(self, url):
-        self._set_attr(self.set_last_build_date.__dict__['binding'],
+        self._set_attr(self.set_last_build_date.binding,
                 '//channel/relocate', url)
-    set_relocate_url.__dict__['binding'] = 'relocate'
+    set_relocate_url.binding = 'relocate'
 
     relocate = property(get_relocate_url, set_relocate_url)
 

@@ -7,6 +7,7 @@ sys.path.insert(0, '../')
 from feed.user import User
 from feed.user import DataLocations as dl
 
+
 class UserTest(unittest.TestCase):
     """ A suite of tests for the User class.
 
@@ -21,7 +22,7 @@ class UserTest(unittest.TestCase):
     # starts out ok.
 
     def test_cached_user_init(self):
-        some_dict = { 'some_key': 'some_value' }
+        some_dict = {'some_key': 'some_value'}
         self.assertEqual(User(entries=some_dict)._status, dl.CACHED)
 
     def test_remote_user_init(self):
@@ -42,13 +43,22 @@ class UserTest(unittest.TestCase):
         user = User(remote_url='http://microblog.brianschrader.com/feed')
         user.cache_user()
         self.assertEqual(user._status, dl.CACHED)
-        self.assertEqual()
+        self.assertEqual(user.username, 'sonicrocketman')
 
     def test_cache_users(self):
-        self.fail('Unimplemented')
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        from feed.user import cache_users
+        cache_users([user])
+        self.assertEqual(user._status, dl.CACHED)
+        self.assertEqual(user.username, 'sonicrocketman')
 
     def test_invalidate_cached_user(self):
-        self.fail('Unimplemented')
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        user.cache_user()
+        self.assertEqual(user._status, dl.CACHED)
+        self.assertEqual(user.username, 'sonicrocketman')
+        user.invalidate_cached_user()
+        self.assertEqual(user._status, dl.REMOTE)
 
     ################### Properties #######################
 
@@ -59,7 +69,7 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.username = username
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting local user username failed.')
         self.assertEqual(user.username, username)
@@ -81,7 +91,7 @@ class UserTest(unittest.TestCase):
         username = 'terry.gilliam'
         try:
             user.username = username
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached user username failed.')
         self.assertEqual(user.username, username)
@@ -93,7 +103,7 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.description = description
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting local user description failed.')
         self.assertEqual(user.description, description)
@@ -115,7 +125,7 @@ class UserTest(unittest.TestCase):
         description = 'some new description'
         try:
             user.description = description
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached user description failed.')
         self.assertEqual(user.description, description)
@@ -127,9 +137,9 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.user_id = user_id
-        except Exception, e:
+        except Exception as e:
             print e
-            self.fail('Setting locl user user_id failed.')
+            self.fail('Setting local user user_id failed.')
         self.assertEqual(user.user_id, user_id)
 
     def test_remote_user_id(self):
@@ -145,11 +155,11 @@ class UserTest(unittest.TestCase):
 
     def test_cached_user_id(self):
         user_id = '544533534534543534'
-        user = User(entries={ 'user_id': user_id })
+        user = User(entries={'user_id': user_id})
         user_id = '54395490gejgo34'
         try:
             user.user_id = user_id
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached user_id failed.')
         self.assertEqual(user.user_id, user_id)
@@ -161,7 +171,7 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.full_name = full_name
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting locl user full_name failed.')
         self.assertEqual(user.full_name, full_name)
@@ -179,11 +189,11 @@ class UserTest(unittest.TestCase):
 
     def test_cached_full_name(self):
         full_name = 'Joe Blow'
-        user = User(entries={ 'full_name': full_name })
+        user = User(entries={'full_name': full_name})
         full_name = 'Joseph Blow'
         try:
             user.full_name = full_name
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached full_name failed.')
         self.assertEqual(user.full_name, full_name)
@@ -195,7 +205,7 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.link = link
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting local user link failed.')
         self.assertEqual(user.link, link)
@@ -217,7 +227,7 @@ class UserTest(unittest.TestCase):
         link = 'http://example.net'
         try:
             user.link = link
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached link failed.')
         self.assertEqual(user.link, link)
@@ -225,64 +235,70 @@ class UserTest(unittest.TestCase):
     # Language
 
     def test_local_language(self):
-        language = 'http://example.com'
+        language = 'en'
         user = User(local_url='user/feed.xml')
         try:
             user.language = language
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting local user language failed.')
         self.assertEqual(user.language, language)
 
     def test_remote_language(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        language = 'en'
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        try:
+            # should fail.
+            user.language = language
+            self.fail('setting a remote user should be forbidden.')
+        except Exception as e:
+            pass
+        self.assertEqual(user.language, language)
 
     def test_cached_language(self):
-        language = 'http://example.com'
+        language = 'en'
         user = User(entries={ 'language': language })
         language = 'http://example.net'
         try:
             user.language = language
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached language failed.')
         self.assertEqual(user.language, language)
 
     # Follows
 
-    def test_local_follows(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_local_follows(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
-    def test_remote_follows(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_remote_follows(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
-    def test_cached_follows(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_cached_follows(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
     # Follows Just Links
 
     def test_local_follows_just_links(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        user = User(local_url='user/feed.xml')
+        self.assertEqual(user._status, dl.LOCAL)
+        self.assertTrue(len(user.follows_just_links) > 0)
 
     def test_remote_follows_just_links(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        self.assertEqual(user._status, dl.REMOTE)
+        self.assertTrue(len(user.follows_just_links) > 0)
 
     def test_cached_follows_just_links(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        user = User(entries={ 'follows': { 'user_id': 123 } })
+        self.assertEqual(user._status, dl.CACHED)
+        self.assertTrue(len(user.follows_just_links) > 0)
 
     # Follows URL
 
@@ -291,15 +307,21 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.follows_url = follows_url
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting local user follows_url failed.')
         self.assertEqual(user.follows_url, follows_url)
 
     def test_remote_follows_url(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        follows_url = 'http://example.com'
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        try:
+            # should fail.
+            user.follows_url = follows_url
+            self.fail('setting a remote user should be forbidden.')
+        except Exception as e:
+            pass
+        self.assertEqual(user.follows_url, follows_url)
 
     def test_cached_follows_url(self):
         follows_url = 'http://example.com'
@@ -307,7 +329,7 @@ class UserTest(unittest.TestCase):
         follows_url = 'http://example.net'
         try:
             user.follows_url = follows_url
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached follows_url failed.')
         self.assertEqual(user.follows_url, follows_url)
@@ -315,37 +337,37 @@ class UserTest(unittest.TestCase):
 
     # Blocks
 
-    def test_local_blocks(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_local_blocks(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
-    def test_remote_blocks(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_remote_blocks(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
-    def test_cached_blocks(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_cached_blocks(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
     # Blocks Just Links
 
-    def test_local_blocks_just_links(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_local_blocks_just_links(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
-    def test_remote_blocks_just_links(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_remote_blocks_just_links(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
-    def test_cached_blocks_just_links(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_cached_blocks_just_links(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
     # Blocks URL
 
@@ -354,15 +376,20 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.blocks_url = blocks_url
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting local user blocks_url failed.')
         self.assertEqual(user.blocks_url, blocks_url)
 
     def test_remote_blocks_url(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+        blocks_url = 'http://example.com'
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        try:
+            user.blocks_url = blocks_url
+        except Exception as e:
+            print e
+            self.fail('Setting remote user blocks_url failed.')
+        self.assertEqual(user.blocks_url, blocks_url)
 
     def test_cached_blocks_url(self):
         blocks_url = 'http://example.com'
@@ -370,7 +397,7 @@ class UserTest(unittest.TestCase):
         blocks_url = 'http://example.net'
         try:
             user.blocks_url = blocks_url
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached blocks_url failed.')
         self.assertEqual(user.blocks_url, blocks_url)
@@ -382,15 +409,15 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.docs_url = docs_url
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting local user docs_url failed.')
         self.assertEqual(user.docs_url, docs_url)
 
-    def test_remote_docs_url(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_remote_docs_url(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
     def test_cached_docs_url(self):
         docs_url = 'http://example.com'
@@ -398,7 +425,7 @@ class UserTest(unittest.TestCase):
         docs_url = 'http://example.net'
         try:
             user.docs_url = docs_url
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached docs_url failed.')
         self.assertEqual(user.docs_url, docs_url)
@@ -410,15 +437,15 @@ class UserTest(unittest.TestCase):
         user = User(local_url='user/feed.xml')
         try:
             user.relocate_url = relocate_url
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting local user relocate_url failed.')
         self.assertEqual(user.relocate_url, relocate_url)
 
-    def test_remote_relocate_url(self):
-        # TODO: Unimplemented
-        self.fail('Unimplemented')
-        pass
+    #def test_remote_relocate_url(self):
+    #    # TODO: Unimplemented
+    #    self.fail('Unimplemented')
+    #    pass
 
     def test_cached_relocate_url(self):
         relocate_url = 'http://example.com'
@@ -426,7 +453,7 @@ class UserTest(unittest.TestCase):
         relocate_url = 'http://example.net'
         try:
             user.relocate_url = relocate_url
-        except Exception, e:
+        except Exception as e:
             print e
             self.fail('Setting cached relocate_url failed.')
         self.assertEqual(user.relocate_url, relocate_url)
@@ -434,34 +461,18 @@ class UserTest(unittest.TestCase):
 
     ################# Methods ###################
 
-    def test_add_and_delete_post(self):
-        self.fail('Unimplemented')
+    #def test_add_and_delete_post(self):
+    #    self.fail('Unimplemented')
 
-    def test_follow_and_unfollow_user(self):
-        self.fail('Unimplemented')
+    #def test_follow_and_unfollow_user(self):
+    #    self.fail('Unimplemented')
 
-    def test_block_and_unblock_user(self):
-        self.fail('Unimplemented')
+    #def test_block_and_unblock_user(self):
+    #    self.fail('Unimplemented')
 
     ############### Timeline Stuff ################
     # TODO
 
-
-
-
-
-
-
-
-
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(UserTest)
-unittest.TextTestRunner(verbosity=2).run(suite)
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(UserTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)

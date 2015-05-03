@@ -39,14 +39,7 @@ class OnDemandCrawler(FeedCrawler):
     feed once the entire set of links is parsed.
 
     The callback recieves a dict of the data.
-    {
-        "[a given link]": [
-            {
-                'info': [],
-                'items': []
-            }
-        ]
-    }"""
+    """
 
     def __init__(self):
         self._data = {}
@@ -71,10 +64,6 @@ class OnDemandCrawler(FeedCrawler):
     def on_finish(self):
         """ Stops the crawler. """
         self.stop(now=True)
-
-
-    def on_error(self, link, error):
-        pass
 
     def on_item(self, link, info, new_item):
         """ Add the item field to the link's dict. """
