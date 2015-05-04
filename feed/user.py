@@ -10,7 +10,7 @@ from dateutil.parser import parse
 import post
 import util as u
 from settingsmanager import SettingsManager
-
+from status import StatusType, Status
 
 # Misc Utilities
 
@@ -597,28 +597,37 @@ class User(object):
     # Timeline Methods
     # TODO: REFACTOR ALL OF THESE
 
-    def fetch(start, n=0):
-        """ Starting at the starting post id, fetches n posts (assuming the posts are ordered).
+    def user_timeline(self, start, n=0):
+        """ Fetch the user's timeline.
+
+        Starting at the starting post id, fetches n posts (assuming the posts are ordered).
         Positive n for posts since start, negative n for previous posts.
         Zero (or nothing) for only the post with the given id. """
-        # Get the tree, exract the starting point.
-        tree = u.get_user_feed('user/feed.xml')
-        stati = [post.post(status) for status in tree.xpath('//channel/item')]
-        stati.sort(key=lambda x: parse(x['pubdate']), reverse=True)
+        if self._status == DataLocations.LOCAL:
+            # Get the tree, exract the starting point.
+            tree = u.get_user_feed('user/feed.xml')
+            stati = [post.post(status) for status in tree.xpath('//channel/item')]
+            stati.sort(key=lambda x: parse(x['pubdate']), reverse=True)
+            starting = stati.index([status for status in stati if status['guid'] == start][0])
+            # Get only the single post.
+            if n == 0:
+                return starting
+            # Get n posts.
+            if n < 0:
+                stati = reversed(stati)
+            end = starting + abs(n)
+            return stati[starting:ending]
+        elif self._status == DataLocations.REMOTE:
+            crawler = OnDemandCrawler()
+            stati = [post.post(status) for status in crawler.get_all_items([user.feed_url])]
 
-        starting = stati.index([status for status in stati if status['guid'] == start][0])
 
-        # Get only the single post.
-        if n == 0:
-            return starting
 
-        # Get n posts.
-        if n < 0:
-            stati = reversed(stati)
 
-        end = starting + abs(n)
-        return stati[starting:ending]
-
+            pass
+        else:
+            # TODO
+            pass
 
     def fetch_top(n=25):
         """ Fetches the n most recent posts in reverse chronological order.  """
