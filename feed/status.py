@@ -1,7 +1,7 @@
 """ A model for a user's post. """
 
 
-from dateutil.parser import parsE
+from dateutil.parser import parse
 
 def _enum(**enums):
     return type('Enum', (), enums)
@@ -26,9 +26,10 @@ class Status(object):
     @since 2015-05-03
     """
 
-    def __init__(self, **entries, status_type=StatusType.STATUS):
-        self.__dict__.update(entries)
-        self.status_type = status_type
+    def __init__(self, entries, status_type=StatusType.STATUS):
+        self.__dict__.update(**entries)
+        self.status_type = status_type if status_type is not None \
+                else _determine_status_type()
         self.pubdate = parse(entries.get('pubdate'))
 
     def to_element(self):
@@ -42,7 +43,7 @@ class Status(object):
                     Please see http://openmicroblog.com for information on required elements.'
             raise AttributeError
 
-        if self.status_type = StatusType.REPLY:
+        if self.status_type == StatusType.REPLY:
             return E.item(
                     # General Info
                     E.guid(self.guid),
@@ -54,7 +55,7 @@ class Status(object):
                     E.in_reply_to_user_id(self.in_reply_to_user_id),
                     E.in_reply_to_user_link(self.in_reply_to_user_link)
                     )
-        elif self.status_type = StatusType.REPOST:
+        elif self.status_type == StatusType.REPOST:
             return E.item(
                     # General Info
                     E.guid(self.guid),
@@ -75,7 +76,6 @@ class Status(object):
                     E.description(self.description),
                     E.language(self.language)
                     )
-
 
     def is_standard(self):
         """ Checks the post and adds some metadata and appends any missing
@@ -108,6 +108,17 @@ class Status(object):
 
         return True
 
+    def _determine_status_type(self):
+        if getattr(self, 'reposted_status_pubdate') is not None \
+                or getattr(self, 'reposted_status_user_id') is not None \
+                or getattr(self, 'reposted_status_user_id') is not None \
+                or getattr(self, 'reposted_status_user_link') is not None:
+                return StatusType.REPOST
+        elif getattr(self, 'in_reply_to_user_id') is not None \
+                or getattr(self, 'in_reply_to_user_link') is not None:
+            return StatusType.REPLY
+        else:
+            return StatusType.STATUS
 
 def _recursive_dict(element):
     """ Converts an element to a recursive dict inside a tuple (tag, dict).

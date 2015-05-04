@@ -83,7 +83,6 @@ class UserTest(unittest.TestCase):
             self.fail('Setting a remote user should be forbidden.')
         except:
             pass
-        self.assertIsNotNone(user.username)
 
     def test_cached_username(self):
         username = 'graham.chapman'
@@ -117,7 +116,6 @@ class UserTest(unittest.TestCase):
             self.fail('Setting a remote user should be forbidden.')
         except:
             pass
-        self.assertIsNotNone(user.description)
 
     def test_cached_description(self):
         description = 'test 1, 2, 3. Is this thing on?'
@@ -147,11 +145,10 @@ class UserTest(unittest.TestCase):
         user = User(remote_url='http://microblog.brianschrader.com/feed')
         try:
             # Should fail.
-            user.user_id= user_id
+            user.user_id = user_id
             self.fail('Setting a remote user should be forbidden.')
         except:
             pass
-        self.assertIsNotNone(user.user_id)
 
     def test_cached_user_id(self):
         user_id = '544533534534543534'
@@ -185,7 +182,6 @@ class UserTest(unittest.TestCase):
             self.fail('setting a remote user should be forbidden.')
         except:
             pass
-        self.assertIsNotNone(user.full_name)
 
     def test_cached_full_name(self):
         full_name = 'Joe Blow'
@@ -219,7 +215,6 @@ class UserTest(unittest.TestCase):
             self.fail('setting a remote user should be forbidden.')
         except:
             pass
-        self.assertIsNotNone(user.link)
 
     def test_cached_link(self):
         link = 'http://example.com'
@@ -253,7 +248,6 @@ class UserTest(unittest.TestCase):
             self.fail('setting a remote user should be forbidden.')
         except Exception as e:
             pass
-        self.assertEqual(user.language, language)
 
     def test_cached_language(self):
         language = 'en'
@@ -321,7 +315,6 @@ class UserTest(unittest.TestCase):
             self.fail('setting a remote user should be forbidden.')
         except Exception as e:
             pass
-        self.assertEqual(user.follows_url, follows_url)
 
     def test_cached_follows_url(self):
         follows_url = 'http://example.com'
@@ -386,10 +379,9 @@ class UserTest(unittest.TestCase):
         user = User(remote_url='http://microblog.brianschrader.com/feed')
         try:
             user.blocks_url = blocks_url
+            self.fail('setting a remote user should be forbidden.')
         except Exception as e:
-            print e
-            self.fail('Setting remote user blocks_url failed.')
-        self.assertEqual(user.blocks_url, blocks_url)
+            pass
 
     def test_cached_blocks_url(self):
         blocks_url = 'http://example.com'
@@ -471,7 +463,27 @@ class UserTest(unittest.TestCase):
     #    self.fail('Unimplemented')
 
     ############### Timeline Stuff ################
-    # TODO
+    def test_local_user_timeline(self):
+        user = User(local_url='user/feed.xml')
+        timeline = user.user_timeline()
+        self.assertTrue(len(timeline) > 0)
+
+    def test_remote_user_timeline(self):
+        user = User(remote_url='http://microblog.brianschrader.com/feed')
+        timeline = user.user_timeline()
+        self.assertTrue(len(timeline) > 0)
+
+    #def test_cached_user_timeline(self):
+    #    pass
+
+    # There's only 1 home timeline test because
+    # it doesn't matter what kind of user it is.
+    def test_home_timeline(self):
+        user = User(local_url='user/feed.xml')
+        timeline = user.home_timeline()
+        self.assertTrue(len(timeline) > 0)
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(UserTest)

@@ -384,7 +384,7 @@ class User(object):
     def follows_just_links(self):
         """ Gets the list of links to the feeds the user follows.
         Basically a simplified version of get_user_follows. """
-        return [user.link for user in self.follows]
+        return [user.user_link for user in self.follows]
 
     # Follows Url
 
@@ -595,20 +595,35 @@ class User(object):
         u.write_user_feed(tree, 'user/blocks.xml')
 
     # Timeline Methods
-    # TODO: REFACTOR ALL OF THESE
 
-    def user_timeline(self, start, n=0):
+    def user_timeline(self, start=None, n=25):
         """ Fetch the user's timeline.
 
         Starting at the starting post id, fetches n posts (assuming the posts are ordered).
         Positive n for posts since start, negative n for previous posts.
         Zero (or nothing) for only the post with the given id. """
+        # TODO: Optimize this.
+        stati = []
         if self._status == DataLocations.LOCAL:
-            # Get the tree, exract the starting point.
             tree = u.get_user_feed('user/feed.xml')
-            stati = [post.post(status) for status in tree.xpath('//channel/item')]
-            stati.sort(key=lambda x: parse(x['pubdate']), reverse=True)
-            starting = stati.index([status for status in stati if status['guid'] == start][0])
+            status_elements = tree.xpath('//channel/item')
+            from status import _recursive_dict
+            status_dicts = [_recursive_dict(status_el)[1] for status_el in
+                   status_elements]
+            stati = [Status(status_dict) for status_dict in status_dicts]
+        elif self._status == DataLocations.REMOTE:
+            from crawler.crawler import OnDemandCrawler
+            crawler = OnDemandCrawler()
+            items = crawler.get_all_items([self._feed_url])[self._feed_url]
+            stati = [Status(item_dict) for item_dict in items]
+        else:
+            # TODO: Figure out cached users.
+            pass
+
+        stati.sort(key=lambda x: x.pubdate, reverse=True)
+        starting = None
+        if start is not None:
+            starting = stati.index([status for status in stati if status.guid == start][0])
             # Get only the single post.
             if n == 0:
                 return starting
@@ -617,25 +632,28 @@ class User(object):
                 stati = reversed(stati)
             end = starting + abs(n)
             return stati[starting:ending]
-        elif self._status == DataLocations.REMOTE:
-            crawler = OnDemandCrawler()
-            stati = [post.post(status) for status in crawler.get_all_items([user.feed_url])]
-
-
-
-
-            pass
+        elif n == 0:
+            return stati[0]
         else:
-            # TODO
-            pass
+            return stati[:n]
 
-    def fetch_top(n=25):
-        """ Fetches the n most recent posts in reverse chronological order.  """
-        if n < 0:
-            raise IndexError
+    def home_timeline(self, start=None, n=25):
+        """ Fetches the user's home timeline.
 
-        tree = u.get_user_feed('user/feed.xml')
-        stati = [post.post(status) for status in tree.xpath('//item')]
-        stati.sort(key=lambda x: parse(x['pubdate']), reverse=True)
-        return stati[:n]
+        This is a collection of posts from the people the user follows.
+        They are ordered reverse chronologically.
+        """
+        # TODO: Optimize this.
+        follow_urls = self.follows_just_links
+        from crawler.crawler import OnDemandCrawler
+        crawler = OnDemandCrawler()
+        items_by_link = crawler.get_all_items(follow_urls)
+        items = []
+        items.extend([items for link, items in items_by_link.iteritems()])
+        timeline = [Status(status_dict) for status_dict in items]
+        timeline.sort(key=lambda x: x.pubdate, reverse=True)
+        return timeline[:n]
+
+
+
 

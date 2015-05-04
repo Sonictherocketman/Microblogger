@@ -7,7 +7,7 @@
         <link>http://example.com</link>
         <profile>http://127.0.0.1:5000</profile>
         <blocks count="">http://example.com</blocks>
-        <follows count="">http://example.com</follows>
+        <follows count="">http://microblog.brianschrader.com/follows</follows>
         <reply_to>
             <link>http://service.tld/reply</link>
             <reply_to_user_id>sample_userid</reply_to_user_id>
