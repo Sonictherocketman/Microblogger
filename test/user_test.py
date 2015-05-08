@@ -483,8 +483,6 @@ class UserTest(unittest.TestCase):
         timeline = user.home_timeline()
         self.assertTrue(len(timeline) > 0)
 
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(UserTest)
     unittest.TextTestRunner(verbosity=2).run(suite)

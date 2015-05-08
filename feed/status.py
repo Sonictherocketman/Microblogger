@@ -26,10 +26,10 @@ class Status(object):
     @since 2015-05-03
     """
 
-    def __init__(self, entries, status_type=StatusType.STATUS):
+    def __init__(self, entries, status_type=None):
         self.__dict__.update(**entries)
         self.status_type = status_type if status_type is not None \
-                else _determine_status_type()
+                else self._determine_status_type()
         self.pubdate = parse(entries.get('pubdate'))
 
     def to_element(self):
@@ -81,44 +81,56 @@ class Status(object):
         """ Checks the post and adds some metadata and appends any missing
         information with the defaults. If the post does not meet standards
         returns False else True. """
-        if getattr(self, 'guid') is None:
-            return False
-        if getattr(self, 'pubdate') is None:
-            return False
-        if getattr(self, 'description') is None:
-            return False
 
+        try:
+            getattr(self, 'guid')
+            getattr(self, 'pubdate')
+            getattr(self, 'description')
+        except Exception as e:
+            return False
+        print self.status_type
         if self.status_type == StatusType.REPOST:
-            if getattr(self, 'reposted_status_pubdate') is None:
-                return False
-            if getattr(self, 'reposted_status_user_id') is None:
-                return False
-            if getattr(self, 'reposted_status_user_id') is None:
-                return False
-            if getattr(self, 'reposted_status_user_link') is None:
+            try:
+                getattr(self, 'reposted_status_pubdate')
+                getattr(self, 'reposted_status_user_id')
+                getattr(self, 'reposted_status_id')
+                getattr(self, 'reposted_status_user_link')
+            except Exception as e:
+                print e
                 return False
         elif self.status_type == StatusType.REPLY:
-            if getattr(self, 'in_reply_to_user_id') is None:
+            try:
+                getattr(self, 'in_reply_to_status_id')
+                getattr(self, 'in_reply_to_user_id')
+                getattr(self, 'in_reply_to_user_link')
+            except Exception as e:
                 return False
-            if getattr(self, 'in_reply_to_user_link') is None:
-                return False
-
-        if getattr(self, 'language') is None:
+        try:
+            getattr(self, 'language')
+        except Exception as e:
             self.language = 'en'
 
         return True
 
     def _determine_status_type(self):
-        if getattr(self, 'reposted_status_pubdate') is not None \
-                or getattr(self, 'reposted_status_user_id') is not None \
-                or getattr(self, 'reposted_status_user_id') is not None \
-                or getattr(self, 'reposted_status_user_link') is not None:
-                return StatusType.REPOST
-        elif getattr(self, 'in_reply_to_user_id') is not None \
-                or getattr(self, 'in_reply_to_user_link') is not None:
-            return StatusType.REPLY
-        else:
-            return StatusType.STATUS
+        # TODO May not find some cases.
+        status_type = None
+        try:
+            getattr(self, 'reposted_status_pubdate')
+            getattr(self, 'reposted_status_user_id')
+            getattr(self, 'reposted_status_id')
+            getattr(self, 'reposted_status_user_link')
+            status_type = StatusType.REPOST
+        except Exception as e:
+            try:
+                getattr(self, 'in_reply_to_status_id')
+                getattr(self, 'in_reply_to_user_id')
+                getattr(self, 'in_reply_to_user_link')
+                status_type = StatusType.REPLY
+            except Exception as e:
+                status_type = StatusType.STATUS
+        return status_type
+
 
 def _recursive_dict(element):
     """ Converts an element to a recursive dict inside a tuple (tag, dict).

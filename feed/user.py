@@ -107,6 +107,9 @@ def cache_users(users):
                         pass
                     if is_setter and is_bound_to_key:
                         method(user, value)
+                        break
+
+
 
     # Local Users
     #if len(local_users) > 0:
