@@ -2,6 +2,9 @@
 
 
 from dateutil.parser import parse
+from lxml.builder import E
+from lxml.etree import CDATA
+
 
 def _enum(**enums):
     return type('Enum', (), enums)
@@ -18,6 +21,13 @@ StatusType = _enum(
         REPOST=2
         )
 
+class StatusNotStandardError(Exception):
+    """ Occurs when an element is attempting to be written
+    as an element to lxml, but the given status does not
+    meet the standard.
+    """
+    pass
+
 
 class Status(object):
     """ This class models a given post from a user.
@@ -31,17 +41,16 @@ class Status(object):
         self.status_type = status_type if status_type is not None \
                 else self._determine_status_type()
         self.pubdate = parse(entries.get('pubdate'))
+        if self.status_type == StatusType.REPOST:
+            self.reposted_status_pubdate = parse(self.reposted_status_pubdate)
+
 
     def to_element(self):
         """ Covert dict to lxml element. Only standard elements are inserted. If the
         post does not meet standards, raises AttributeError.
         See http://openmicroblog.com for information about the standard elements."""
-        if self.is_standard:
-            self = standardize(self)
-        else:
-            print 'The post self provided does not meet Open Microblog standards. \n\
-                    Please see http://openmicroblog.com for information on required elements.'
-            raise AttributeError
+        if not self.is_standard():
+            raise StatusNotStandardError('Status does not meet the Open Microblog Standard')
 
         if self.status_type == StatusType.REPLY:
             return E.item(
@@ -88,7 +97,6 @@ class Status(object):
             getattr(self, 'description')
         except Exception as e:
             return False
-        print self.status_type
         if self.status_type == StatusType.REPOST:
             try:
                 getattr(self, 'reposted_status_pubdate')
@@ -96,7 +104,6 @@ class Status(object):
                 getattr(self, 'reposted_status_id')
                 getattr(self, 'reposted_status_user_link')
             except Exception as e:
-                print e
                 return False
         elif self.status_type == StatusType.REPLY:
             try:
@@ -113,7 +120,7 @@ class Status(object):
         return True
 
     def _determine_status_type(self):
-        # TODO May not find some cases.
+        # TODO May not accurately
         status_type = None
         try:
             getattr(self, 'reposted_status_pubdate')

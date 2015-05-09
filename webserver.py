@@ -14,19 +14,14 @@ from flask import Flask, request, session, url_for, redirect,\
 from werkzeug import check_password_hash, generate_password_hash
 from flask_limiter import Limiter
 
-from feed import feedgenerator as fg,\
-        feedreader as fr, \
-        feedupdater as fu
-from crawler.crawler import MicroblogFeedCrawler, OnDemandCrawler
 from cachemanager import CacheManager
 from settingsmanager import SettingsManager
-
+from model.user import User
+from model.status import Status
 
 # Init the application
 app = Flask(__name__)
 limiter = Limiter(app)
-main_crawler = None
-on_demand_crawler = None
 app.debug = True
 app.secret_key = SettingsManager.get('secret')
 CacheManager(cache_location=SettingsManager.get('cache_location'))
@@ -410,6 +405,5 @@ def post_messages():
 
 if __name__ == '__main__':
     # Start up the app
-    print 'Hi. This is debug mode.'
     app.run()
 

@@ -7,10 +7,9 @@ from lxml.etree import CDATA
 from lxml import etree
 from dateutil.parser import parse
 
-import post
 import util as u
 from settingsmanager import SettingsManager
-from status import StatusType, Status
+from status import StatusType, Status, _recursive_dict
 
 # Misc Utilities
 
@@ -59,7 +58,7 @@ def _search_recurs(rel_location, xpath_qry):
     next_node = feed.xpath('//next_node')
 
     if item:
-        return rel_location, post(item[0])['guid']
+        return rel_location, Status(item[0]).guid
     elif next_node:
         new_rel_location = u.convert_url(next_node[0].text, to_relative=True)
         _search_recurs(new_rel_location, xpath_qry)
@@ -379,7 +378,7 @@ class User(object):
             return list()
 
         for user_el in follows_el:
-            user_dict = post._recursive_dict(user_el)[1]
+            user_dict = _recursive_dict(user_el)[1]
             follows.append(User(entries=user_dict))
         return follows
 
@@ -414,7 +413,7 @@ class User(object):
         blocks_el = feed.xpath('//channel/item')
 
         for user_el in blocks_el:
-            user_dict = post._recursive_dict(user_el)[1]
+            user_dict = _recursive_dict(user_el)[1]
             blocks.append(User(**user_dict))
         return blocks
 
@@ -610,7 +609,6 @@ class User(object):
         if self._status == DataLocations.LOCAL:
             tree = u.get_user_feed('user/feed.xml')
             status_elements = tree.xpath('//channel/item')
-            from status import _recursive_dict
             status_dicts = [_recursive_dict(status_el)[1] for status_el in
                    status_elements]
             stati = [Status(status_dict) for status_dict in status_dicts]
