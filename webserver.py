@@ -423,7 +423,7 @@ def post_unfollow():
 @app.route('/block', methods=['POST'])
 @login_required
 @limiter.limit('50 per 15 minutes')
-def post_follow():
+def post_block():
     """ Adds a new follow to the user's list. """
     user_link = request.form['follow-url']
     if user_link != '':
@@ -437,7 +437,7 @@ def post_follow():
 @app.route('/unblock', methods=['POST'])
 @login_required
 @limiter.limit('50 per 15 minutes')
-def post_unfollow():
+def post_unblock():
     """ Unfollows a given user. """
     user_link = request.form['user_link']
     username = request.form['username']
@@ -475,9 +475,6 @@ def follows(username):
     location = user_for_username(username)['follows_location']
     with open(location) as f:
         return f.read()
-
-
-
 
 
 if __name__ == '__main__':
