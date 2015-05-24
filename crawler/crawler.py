@@ -2,8 +2,6 @@
 
 from microblogcrawler.crawler import FeedCrawler
 from util import from_settings
-from feed.feedreader import get_user_link, get_user_follows_links, get_user_blocks_links
-from post import post
 from cachemanager import CacheManager
 
 import time

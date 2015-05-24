@@ -71,6 +71,11 @@
  
  }
  
+ .post-actions {
+ 	display:inline;
+ 	float:right;
+ }
+ 
  .post .username {
 	color:grey;
 	font-style: italic;

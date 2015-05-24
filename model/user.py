@@ -29,6 +29,15 @@ def _set_to_feed(rel_location, xpath, value):
     u.write_user_feed(feed, rel_location)
 
 
+def _del_from_feed(rel_location, xpath):
+    """ Deletes a node found at the given xpath from the feed. """
+    feed = u.get_user_feed(rel_location)
+    element = feed.xpath(xpath)
+    if element:
+        element[0].getparent().remove(element[0])
+    u.write_user_feed(feed, rel_location)
+
+
 def _write_to_feed(tree, rel_location):
     """ Writes the given tree to the location given. If pagination
     is required, then it will paginate the files. Wraps
@@ -53,13 +62,17 @@ def _search_recurs(rel_location, xpath_qry):
 
     Returns a tuple (rel_file_url, guid)
     """
-    feed = u.get_user_feed(starting_location)
+    feed = u.get_user_feed(rel_location)
     item = feed.xpath(xpath_qry)
     next_node = feed.xpath('//next_node')
 
-    if item:
-        return rel_location, Status(item[0]).guid
+    print xpath_qry
+    print item
+
+    if len(item) > 0:
+        return rel_location, item[0].get('guid')
     elif next_node:
+        # TODO: DOES NOT WORK
         new_rel_location = u.convert_url(next_node[0].text, to_relative=True)
         _search_recurs(new_rel_location, xpath_qry)
     else:
@@ -161,45 +174,68 @@ class User(object):
             """ Create new User from dict. """
             self._status = DataLocations.CACHED
             self.__dict__.update(**entries)
-        elif isinstance(local_url, str):
+        elif isinstance(local_url, str) or isinstance(local_url, unicode):
             """ Create new local User with feed @ location. """
             self._status = DataLocations.LOCAL
             self._rel_location = local_url
             if force_cache: self._cache_user()
-        elif isinstance(remote_url, str):
+        elif isinstance(remote_url, str) or isinstance(remote_url, unicode):
             """ Create new remote user with feed @ location. """
             self._status = DataLocations.REMOTE
             self._feed_url = remote_url
             if force_cache: self._cache_user()
+        else:
+            raise UserNotBackedError('No backing store was provided for user.')
 
-    def _generate_new_user_feed(location='user/feed.xml', username='', user_ud='',):
+    @staticmethod
+    def create(username):
+        """ Creates a new user backing store.
+        A user_id is automatically assigned, and related files are linked.
+        @returns new_user, feed_location, blocks_location, follows_location
+        """
+        from uuid import uuid4
+        user_id = str(uuid4())
+        user_dir = 'user/{}'.format(user_id)
+
+        # Create a folder to host the user's files.
+        import os
+        os.mkdir(user_dir)
+        feed_location = '{}/feed.xml'.format(user_dir)
+        blocks_location = '{}/blocks.xml'.format(user_dir)
+        follows_location = '{}/follows.xml'.format(user_dir)
+
+        User._generate_new_user_feed(feed_location)
+        User._generate_new_block_list(blocks_location)
+        User._generate_new_follows_list(follows_location)
+
+        user = User(local_url=feed_location)
+        user.user_id = user_id
+        user.username = username
+
+        return user, feed_location, blocks_location, follows_location
+
+    @staticmethod
+    def _generate_new_user_feed(location):
         """ Creates a blank XML feed and writes it. To fill in the
         information for the feed use the other helper methods provided. """
-        # TODO: Combine the 3 methods.
         feed = E.channel(
                 E.username(''),
                 E.user_id(''),
                 E.user_full_name(''),
                 E.description(CDATA('')),
                 E.link(''),
-                E.blocks('', count=''),
-                E.follows('', count=''),
+                E.blocks('', count='0'),
+                E.follows('', count='0'),
                 E.docs(''),
                 E.language(''),
                 E.lastBuildDate(''),
-                E.reply_to(
-                    E.link(''),
-                    E.reply_to_user_id(''),
-                    E.reply_to_status_id(),
-                    E.reply_from_user_id(),
-                    E.reply_status_id(),
-                    E.user_link()
-                    ),
+                E.message('')
                 )
-        u.write_user_feed(feed, location)
+        tree = etree.ElementTree(element=feed)
+        u.write_user_feed(tree, location)
 
-
-    def _generate_new_block_list(rel_location='user/blocks.xml'):
+    @staticmethod
+    def _generate_new_block_list(location):
         """ Creates a new root block list in
         the default location.
 
@@ -212,9 +248,11 @@ class User(object):
                     E.lastBuildDate(''),
                     count='0'
                     )
-        u.write_user_feed(feed, location)
+        tree = etree.ElementTree(element=feed)
+        u.write_user_feed(tree, location)
 
-    def _generate_new_follows_list(rel_location='user/follows.xml'):
+    @staticmethod
+    def _generate_new_follows_list(location):
         """ Creates a new root follows list in
         the default location.
 
@@ -227,7 +265,8 @@ class User(object):
                 E.lastBuildDate(''),
                 count='0'
                 )
-        u.write_user_feed(feed, location)
+        tree = etree.ElementTree(element=feed)
+        u.write_user_feed(tree, location)
 
     ############# Behind the Curtain ################
 
@@ -239,20 +278,31 @@ class User(object):
         the user's cached values will be used (unless cleared).
         """
         if self._status == DataLocations.LOCAL:
-            return _get_from_feed(self._rel_location, xpath)
+            return self._get_attr_el(self._rel_location, attr, xpath)[0].text
         elif self._status == DataLocations.REMOTE:
             self.cache_user()
         return self.__dict__.get(attr)
 
     def _set_attr(self, attr, xpath, value):
         """ Sets the given attr to the value. If the user is NOT a
-        local user, then that user's cached values are updated. """
+        local user, then that user's cached values are updated.
+        """
         if self._status == DataLocations.LOCAL:
             _set_to_feed(self._rel_location, xpath, value)
         elif self._status == DataLocations.REMOTE:
             raise RemoteUserPropertyError
         else:
             self.__dict__[attr] = value
+
+    def _get_attr_el(self, location, attr, xpath):
+        """ A more generic form of _get_attr that returns a
+        list of all elements matching the given xpath.
+        """
+        if self._status != DataLocations.LOCAL:
+            raise UserNotBackedError(\
+                    'To get the elements of a feed, the user must be local.')
+        return u.get_user_feed(location).xpath(xpath)
+
 
     ################# Caching ###################
 
@@ -337,6 +387,20 @@ class User(object):
 
     full_name = property(get_full_name, set_full_name)
 
+    # Profile
+
+    def get_profile(self):
+        return self._get_attr(self.get_profile.binding,
+                '//channel/profile')
+    get_profile.binding = 'profile'
+
+    def set_profile(self, profile):
+        self._set_attr(self.set_profile.binding,
+                '//channel/profile', profile)
+    set_profile.binding = 'profile'
+
+    profile = property(get_profile, set_profile)
+
     # Link
 
     def get_link(self):
@@ -367,26 +431,32 @@ class User(object):
 
     # Follows
 
-    @property
-    def follows(self):
+    def get_follows(self):
         """ Get the list of the people the user follows. """
-        # TODO: FIX THIS - This only works for LOCAL users.
-        feed = u.get_user_feed('user/follows.xml')
         follows = []
-        follows_el = feed.xpath('//channel/item')
-        if not len(follows_el) > 0:
-            return list()
+        if self._status == DataLocations.CACHED:
+            follows = self.__dict__.get('follows')
+        else:
+            # Get the users from the feed.
+            # TODO: Only works for local users.
+            items = []
+            if self._status == DataLocations.LOCAL:
+                location = SettingsManager.get_user(self.user_id)['follows_location']
+                item_els = self._get_attr_el(location, self.get_follows.binding, '//channel/item')
+                follows = [_recursive_dict(item)[1] for item in item_els]
 
-        for user_el in follows_el:
-            user_dict = _recursive_dict(user_el)[1]
-            follows.append(User(entries=user_dict))
+            follows = [User(remote_url=item['user_link']) for item in follows]
+            cache_users(follows)
         return follows
+    get_follows.binding = 'follows_items'
+
+    follows = property(get_follows)
 
     @property
     def follows_just_links(self):
         """ Gets the list of links to the feeds the user follows.
         Basically a simplified version of get_user_follows. """
-        return [user.user_link for user in self.follows]
+        return [user.link for user in self.follows]
 
     # Follows Url
 
@@ -408,13 +478,21 @@ class User(object):
     def blocks(self):
         # TODO FIX THIS - This only works for LOCAL users.
         """ Get the list of the people the user follows. """
-        feed = u.get_user_feed('user/blocks.xml')
         blocks = []
-        blocks_el = feed.xpath('//channel/item')
-
-        for user_el in blocks_el:
-            user_dict = _recursive_dict(user_el)[1]
-            blocks.append(User(**user_dict))
+        if self._status == DataLocations.LOCAL:
+            location = SettingsManager.get_user()['blocks_location']
+            feed = u.get_user_feed('user/blocks.xml')
+            blocks_el = feed.xpath('//channel/item')
+            for user_el in blocks_el:
+                user_dict = _recursive_dict(user_el)[1]
+                blocks.append(User(**user_dict))
+        elif self._status == DataLocations.REMOTE:
+            crawler = OnDemandCrawler()
+            items = crawler.get_all_items(self.blocks_url)
+            for item in items:
+                blocks.append(User(entries=item))
+        else:
+            blocks = self.__dict__.get('blocks')
         return blocks
 
     @property
@@ -435,24 +513,19 @@ class User(object):
 
     blocks_url = property(get_blocks_url, set_blocks_url)
 
-    # Reply To
+    # Message
 
-    def get_reply_to_url(self):
-        # TODO: REFACTOR
-        feed = u.get_user_feed('user/feed.xml')
-        return feed.xpath('channel/reply_to/link')[0].text
-    get_reply_to_url.binding = 'reply_to'
+    def get_message_url(self):
+        return self._get_attr(self.get_docs_url.binding,
+                '//channel/message')
+    get_message_url.binding = 'message'
 
-    def set_reply_to_url(self, url):
-        # TODO: REFACTOR
-        feed = u.get_user_feed('user/feed.xml')
-        reply_to_link_element = feed.xpath('/channel/reply_to/link')
-        if reply_to_link_element:
-            reply_to_link_element[0].text = url
-        u.write_user_feed(feed, 'user/feed.xml')
-    set_reply_to_url.binding = 'reply_to'
+    def set_message_url(self, url):
+        self._set_attr(self.set_mesage_url.binding,
+                '//channel/message', url)
+    set_message_url.binding = 'message'
 
-    reply_to_url = property(get_reply_to_url, set_reply_to_url)
+    messageurl = property(get_message_url, set_message_url)
 
     # Docs
 
@@ -520,81 +593,110 @@ class User(object):
 
     def add_post(self, new_post):
         """ Adds the given post to the user's feed. """
-        tree = u.get_user_feed('user/feed.xml')
+        if self._status != DataLocations.LOCAL:
+            raise RemoteUserPropertyError('Cannot add posts to non-local user.')
+        tree = u.get_user_feed(self._rel_location)
         channel = tree.xpath('//channel')[0]
-        channel.append(to_element(new_post))
-        _write_to_feed(tree, 'user/feed.xml')
+        channel.append(new_post.to_element())
+        _write_to_feed(tree, self._rel_location)
 
     def delete_post(self, status_id):
         """ Deletes the post with the given id from the feed.  """
         # TODO: Test
+        if self._status != DataLocations.LOCAL:
+            raise RemoteUserPropertyError('Cannot delete posts from non-local user.')
         to_delete_qry = '/channel/items/item[@guid={0}'.format(status_id)
 
-        feed_url, guid = _search_recurs('user/feed.xml', to_delete_qry)
+        feed_url, guid = _search_recurs(self._rel_location, to_delete_qry)
 
         tree = u.get_user_feed(feed_url)
         item = tree.xpath('//item[@guid=$guid]', guid)
         item.getparent().remove(bad)
 
-        u.write_user_feed(tree, 'user/feed.xml')
+        u.write_user_feed(tree, self._rel_location)
 
     # Following
 
-    def follow(user_id, user_link, user_name):
-        """ Adds a given user to the list of users to follow. """
-        feed = u.get_user_feed('user/follows.xml')
+    def follow(self, user_id=None, user_link=None, user_name=None):
+        """ Adds a given user to the list of users to follow.
+        If only a user_link is provided, then the rest of the
+        information will be collected from the feed.
+        """
+        user = None
+        if user_link is not None and (user_id is None or user_name is None):
+            # Go get the user's details.
+            user = User(remote_url=user_link)
+        if user.link is None or user.username is None or user.user_id is None:
+            # Assert that all data is collected.
+            user = None
+
+        if user is None:
+            raise UserNotBackedError('Cannot follow a non-backed user.')
+        if self._status != DataLocations.LOCAL:
+            raise RemoteUserPropertyError('Cannot add follows to non-local user.')
+        location = SettingsManager.get_user(self.user_id)['follows_location']
+        feed = u.get_user_feed(location)
         tree = feed.xpath('//channel')[0]
         element = E.item(
-                E.user_id(user_id),
-                E.user_name(user_name),
-                E.user_link(user_link)
+                E.user_id(user.user_id),
+                E.user_name(user.username),
+                E.user_link(user.link)
                 )
         tree.append(element)
-        _write_to_feed(feed, 'user/follows.xml')
+        _write_to_feed(feed, location)
 
-    def unfollow(user_id, user_link, user_name):
+    def unfollow(self, user_id, user_link, user_name):
         """ Deletes a user from the user's follow list. All 3 parameters
         are needed since the user_id and user_name may not be unique. """
         # TODO: Test
-        to_delete_qry = '/channel/items/item[@user_name={0} and @user_id={1} \
-                and @user_link={2}]'.format(user_name, user_id, user_link)
-
-        feed_url, guid = _search_recurs('user/follows.xml', to_delete_qry)
-
-        tree = u.get_user_feed(feed_url)
-        item = tree.xpath('//item[@guid=$guid]', guid)
-        item.getparent().remove(bad)
-
-        u.write_user_feed(tree, 'user/follows.xml')
+        if self._status != DataLocations.LOCAL:
+            raise RemoteUserPropertyError('Cannot add follows to non-local user.')
+        to_delete_qry = '/channel/item[user_name=\'{0}\' and user_id=\'{1}\']'\
+                .format(user_name, user_id)
+        location = SettingsManager.get_user(self.user_id)['follows_location']
+        feed_url, guid = _search_recurs(location, to_delete_qry)
+        _del_from_feed(feed_url, to_delete_qry)
 
     # Blocking
 
-    def block(user_id, user_link, user_name):
+    def block(self, user_id, user_link, user_name):
         """ Adds a given user to the block list.  """
-        feed = u.get_user_feed('user/blocks.xml')
+        user = None
+        if user_link is not None and (user_id is None or user_name is None):
+            # Go get the user's details.
+            user = User(remote_url=user_link)
+        if user.link is None or user.username is None or user.user_id is None:
+            # Assert that all data is collected.
+            user = None
+
+        if user is None:
+            raise UserNotBackedError('Cannot follow a non-backed user.')
+        if self._status != DataLocations.LOCAL:
+            raise RemoteUserPropertyError('Cannot add follows to non-local user.')
+        location = SettingsManager.get_user(self.user_id)['blocks_location']
+        feed = u.get_user_feed(location)
         tree = feed.xpath('//channel')[0]
         element = E.item(
-                E.user_id(user_id),
-                E.user_name(user_name),
-                E.user_link(user_link)
+                E.user_id(user.user_id),
+                E.user_name(user.username),
+                E.user_link(user.link)
                 )
         tree.append(element)
         _write_to_feed(feed, 'user/blocks.xml')
 
-    def unblock(user_id, user_link, user_name):
+    def unblock(self, user_id, user_link, user_name):
         """ Deletes a user from the user's follow list. All 3 parameters
         are needed since the user_id and user_name may not be unique. """
         # TODO: Test
+        if self._status != DataLocations.LOCAL:
+            raise RemoteUserPropertyError('Cannot add blocks to non-local user.')
+        location = SettingsManager.get_user(self.user_id)['blocks_location']
         to_delete_qry = '/channel/items/item[@user_name={0} and @user_id={1} \
                 and @user_link={2}]'.format(user_name, user_id, user_link)
 
-        feed_url, guid = _search_recurs('user/blocks.xml', to_delete_qry)
+        feed_url, guid = _search_recurs(location, to_delete_qry)
+        _del_from_feed(feed_url, to_delete_qry)
 
-        tree = u.get_user_feed(feed_url)
-        item = tree.xpath('//item[@guid=$guid]', guid)
-        item.getparent().remove(bad)
-
-        u.write_user_feed(tree, 'user/blocks.xml')
 
     # Timeline Methods
 
@@ -607,11 +709,12 @@ class User(object):
         # TODO: Optimize this.
         stati = []
         if self._status == DataLocations.LOCAL:
-            tree = u.get_user_feed('user/feed.xml')
+            location = SettingsManager.get_user(self.user_id)['feed_location']
+            tree = u.get_user_feed(location)
             status_elements = tree.xpath('//channel/item')
             status_dicts = [_recursive_dict(status_el)[1] for status_el in
                    status_elements]
-            stati = [Status(status_dict) for status_dict in status_dicts]
+            stati = [Status(status_dict, user=self) for status_dict in status_dicts]
         elif self._status == DataLocations.REMOTE:
             from crawler.crawler import OnDemandCrawler
             crawler = OnDemandCrawler()
@@ -646,15 +749,17 @@ class User(object):
         """
         # TODO: Optimize this.
         follow_urls = self.follows_just_links
+        follow_urls.append(self.link)
         from crawler.crawler import OnDemandCrawler
         crawler = OnDemandCrawler()
         items_by_link = crawler.get_all_items(follow_urls)
-        items = []
-        items.extend([items for link, items in items_by_link.iteritems()])
-        timeline = [Status(status_dict) for status_dict in items]
+        all_items = []
+        for link, items in items_by_link.iteritems():
+            all_items += items
+        timeline = []
+        for status_dict in all_items:
+            user = User(entries=status_dict['user'])
+            timeline.append(Status(status_dict, user=user))
         timeline.sort(key=lambda x: x.pubdate, reverse=True)
         return timeline[:n]
-
-
-
 

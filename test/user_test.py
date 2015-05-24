@@ -4,8 +4,8 @@ import unittest
 import sys
 
 sys.path.insert(0, '../')
-from feed.user import User
-from feed.user import DataLocations as dl
+from model.user import User, cache_users
+from model.user import DataLocations as dl
 
 
 class UserTest(unittest.TestCase):
@@ -47,7 +47,6 @@ class UserTest(unittest.TestCase):
 
     def test_cache_users(self):
         user = User(remote_url='http://microblog.brianschrader.com/feed')
-        from feed.user import cache_users
         cache_users([user])
         self.assertEqual(user._status, dl.CACHED)
         self.assertEqual(user.username, 'sonicrocketman')

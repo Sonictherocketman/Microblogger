@@ -3,19 +3,35 @@
 {% block title %}This is the title{% endblock %}
 
 {% block profile %}
-<div class='user-info'>
-	<span class='user_full_name'>{{ user['user_full_name'] }}</span>
-	<span class='username'><a href='{{ user_link }}'>{{ user['username'] }}</a></span>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class='panel-title'>
+			<span class='user_full_name'>{{ user.full_name }}</span>
+			<span class='username'><a href='{{ user.profile }}'>@{{ user.username }}</a></span>
+		</div>
+	</div>
+	<div class="panel-body">
+		<div class='bio'>{{ user.description }}</div>
+	</div>
+	<div class="panel-footer">
+		<div class="btn-group btn-group-justified" role="group" aria-label="...">
+  			<div class="btn-group" role="group">
+			  <a href="{{ user.profile }}" type="button" class="btn btn-default {{ 'active' if page_type == 'profile' }}">Posts</a>
+			</div>
+  			<div class="btn-group" role="group">
+			  <a href="/{{ user.username}}/follows" type="button" class="btn btn-default {{ 'active' if page_type == 'following' }}">Following</a>
+			</div>
+		</div>
+	</div>
 </div>
-<div class='bio'>{{ user['bio'] }}</div>
 {% endblock %}
 
 {% block post_list %}
 	{# Add the item to the list. #}
-	{% if follows is none or follows|length > 0 %}
+	{% if follows is none or follows|length == 0 %}
 		{% include 'no_entries.html' %}
 	{% endif %}
-	{% for item in follows %}
+	{% for user in follows %}
 		{% include 'user.html' %}
 	{% endfor %}
 {% endblock %}		

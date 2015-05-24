@@ -8,7 +8,7 @@ function setChangeFlag(el) {
 }
 
 function saveToForm(el) {
-	$('#' + $(el).attr('id') + '_text').val($(el).text());
+	$('#' + $(el).attr('id') + '_text').val($(el).val());
 	$('#' + $(el).attr('id') + '_changed').val('true');
 }
 
@@ -20,11 +20,11 @@ function saveToForm(el) {
 {% block profile %}
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<span class='user_full_name'>{{ user['user_full_name'] }}</span>
-		<span class='username'><a href='{{ user_link }}'>@{{ user['username'] }}</a></span>
+		<span class='user_full_name'>{{ user.full_name }}</span>
+		<span class='username'><a href='{{ user.profile }}'>@{{ user.username }}</a></span>
 	</div>
 		<div class="panel-body">
-		<div class='bio'>{{ user['bio'] }}</div>
+		<div class='bio'>{{ user.description }}</div>
 	</div>
 </div>
 {% endblock %}
@@ -42,7 +42,7 @@ function saveToForm(el) {
 			<div class='post'>
 				<label for='full_name'>Full name:</label>
 				<input type='hidden' name='full_name_changed' id='full_name_changed' value='false' />
-				<input type='text' class="form-control" name='full_name' id='full_name' value='{{ user["user_full_name"] }}' onchange='setChangeFlag(this);'/>
+				<input type='text' class="form-control" name='full_name' id='full_name' value='{{ user.full_name }}' onchange='setChangeFlag(this);'/>
 			</div>
 			<div class='post'>
 				<div class='post-content'>
@@ -50,7 +50,7 @@ function saveToForm(el) {
 					<label for='username'>Username:</label>
 					<div class="input-group">
 						<span class="input-group-addon" id="basic-addon1">@</span>
-						<input type='text' class="form-control" placeholder="Username" aria-describedby="basic-addon1" name='username' id='username' value='{{ user["username"] }}' onchange='setChangeFlag(this);'/>
+						<input type='text' class="form-control" readonly placeholder="Username" aria-describedby="basic-addon1" name='username' id='username' value='{{ user.username }}' onchange='setChangeFlag(this);'/>
 					</div>
 				</div>
 			</div>
@@ -64,7 +64,7 @@ function saveToForm(el) {
 					<label for='bio'>Bio:</label>
 					<input type='hidden' name='bio_changed' id='bio_changed' value='false' />
 					<input type='hidden' name='bio' id='bio_text' />
-					<textarea id='bio' class="form-control" rows='4' maxlength='250' placeholder='Describe yourself!' onchange='saveToForm(this);'>{{ user['bio'] }}</textarea>
+					<textarea id='bio' class="form-control" rows='4' maxlength='250' placeholder='Describe yourself!' onchange='saveToForm(this);'>{{ user.description }}</textarea>
 				</div>
 			</div>
 			<button class='btn btn-primary type='submit'>Update Profile</button>

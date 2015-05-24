@@ -1,24 +1,36 @@
 {% extends "layout.html" %}
 
-{% block title %}{{ user['user_full_name'] }}'s microblog{% endblock %}
+{% block title %}{{ user.full_name }}'s microblog{% endblock %}
 
 {% block profile %}
-<div class="panel panel-primary">
+<div class="panel panel-default">
 	<div class="panel-heading">
 		<div class='panel-title'>
-			<span class='user_full_name'>{{ user['user_full_name'] }}</span>
-			<span class='username'><a href='{{ user['user_profile'] }}'>@{{ user['username'] }}</a></span>
+			<span class='user_full_name'>{{ user.full_name }}</span>
+			<span class='username'><a href='{{ user.profile }}'>@{{ user.username }}</a></span>
 		</div>
 	</div>
-		<div class="panel-body">
-		<div class='bio'>{{ user['bio'] }}</div>
+	<div class="panel-body">
+		<div class='bio'>{{ user.description }}</div>
 	</div>
+	{% if page_type != 'timeline' %}
+	<div class="panel-footer">
+		<div class="btn-group btn-group-justified" role="group" aria-label="...">
+  			<div class="btn-group" role="group">
+			  <a href="{{ user.profile }}" type="button" class="btn btn-default {{ 'active' if page_type == 'profile' }}">Posts</a>
+			</div>
+  			<div class="btn-group" role="group">
+			  <a href="/{{ user.username}}/follows" type="button" class="btn btn-default {{ 'active' if page_type == 'following' }}">Following</a>
+			</div>
+		</div>
+	</div>
+	{% endif %}
 </div>
 {% endblock %}
 
 {% block post_list %}
 	{# Add the posts to the list. #}
-	{% for post in posts %}
+	{% for status in posts %}
 		{% include 'post.html' %}
 	{% endfor %}
 {% endblock %}		
@@ -47,9 +59,9 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<div class='post text center'>
-					<input class='form-control' placeholder="To follow someone, copy their feed link here." maxLength="200" name='follow-url'/>
+					<input class='form-control' placeholder="To follow someone, paste their feed link here." maxLength="200" name='follow-url'/>
 				</div>
-				<input class='btn btn-primary' type='submit' value='Add' />
+				<input class='btn btn-primary' type='submit' value='Follow' />
 			</div>
 			<div class='post-options'>
 				<!-- This is where the 'reply', 'get link to', etc options will go. -->
@@ -63,7 +75,7 @@
 		<div class="panel-body">
 			<div class='post text center'>
 				<label for='follow-link'>Copy this into your Microblog client of choice</label>
-				<input id='follow-link' class='form-control' value="{{ user['user_link'] }}" onclick="this.select()"/>
+				<input id='follow-link' class='form-control' value="{{ user.link }}" onclick="this.select()"/>
 			</div>
 			<!--<input class='btn btn-primary' type='button' value='Copy' />-->
 		</div>

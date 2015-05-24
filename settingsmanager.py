@@ -56,3 +56,25 @@ class SettingsManager():
     def get(key):
         """ Gets the value for the given key from the settings. """
         return from_settings(SettingsManager.settings_file_location, key)
+
+    @staticmethod
+    def get_user(user_id):
+        return SettingsManager.get('registered_users')[user_id]
+
+    @staticmethod
+    def add_user(username, pwd_hash, user_id, feed_location, blocks_location, follows_location):
+        users = SettingsManager.get('registered_users')
+        if users is None:
+            users = {}
+        users[user_id] = {
+                'pwd_hash': pwd_hash,
+                'username': username,
+                'feed_location': feed_location,
+                'blocks_location': blocks_location,
+                'follows_location': follows_location
+                }
+        SettingsManager.add('registered_users', users)
+
+
+
+
