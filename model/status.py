@@ -10,8 +10,8 @@ def _enum(**enums):
     return type('Enum', (), enums)
 
 
-DATE_STR_FORMAT = '%a, %d %b %Y %H:%M:%S %z'
-READABLE_DATE_STR_FORMAT = '%m/%d/%Y %H:%M'
+DATE_STR_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
+READABLE_DATE_STR_FORMAT = '%m/%d/%Y %I:%M %p'
 
 # Status Model
 
@@ -37,21 +37,161 @@ class Status(object):
     @since 2015-05-03
     """
 
-    def __init__(self, entries, user=None, status_type=None):
-        self.__dict__.update(**entries)
+    def __init__(self, entries=None, user=None, status_type=None):
+        """ Creates a new, blank status. If the entries parameter is
+        provided the default entries will be overriden.
+        At the bare minimum, the status will have a guid.
+        """
+        if entries is not None:
+            self.__dict__.update(**entries)
+
+            if isinstance(entries.get('pubdate'), datetime):
+                self.pubdate = entries.get('pubdate')
+            else:
+                self.pubdate = parse(entries.get('pubdate'))
+
+            if self.status_type == StatusType.REPOST:
+                self.reposted_status_pubdate = parse(self.reposted_status_pubdate)
+
+        # Set the rest of the status up.
+        self.user = user
+        self.guid = uuid4().hex[-12:]
+        # Check yourself.
         self.status_type = status_type if status_type is not None \
                 else self._determine_status_type()
-        if isinstance(entries.get('pubdate'), datetime):
-            self.pubdate = entries.get('pubdate')
-        else:
-            self.pubdate = parse(entries.get('pubdate'))
+
+    # Guid
+
+    @property
+    def guid(self):
+        return self.__dict__.get('guid')
+
+    @property.setter
+    def set_guid(self, guid):
+        self.__dict__.set('guid', guid)
+
+    # PubDate
+
+    @property
+    def pubdate(self):
+        return self.__dict__.get('pubdate')
+
+    @property.setter
+    def set_pubdate(self, pubdate):
+        if isinstance(pubdate, datetime):
+            raise ValueError('pubdate must be a datetime.')
+        self.__dict__.set('pubdate', pubdate)
+
+    @property
+    def readable_pubdate(self):
         tz = timezone('US/Pacific')
-        self.readable_pubdate = self.pubdate.astimezone(tz)\
+        return self.pubdate.astimezone(tz)\
                 .strftime(READABLE_DATE_STR_FORMAT)
 
-        if self.status_type == StatusType.REPOST:
-            self.reposted_status_pubdate = parse(self.reposted_status_pubdate)
-        self.user = user
+    # Description
+
+    @property
+    def description(self):
+        return self.__dict__.get('description')
+
+    @property.setter
+    def set_description(self, description):
+        if len(description) > 200:
+            raise ValueError('Description is too long.')
+        self.__dict__.set('description', description)
+
+    # Reply
+
+    @property
+    def reply(self):
+        return self.__dict__.get('reply')
+
+    @property.setter
+    def set_reply(self, reply):
+        self.__dict__.set('reply', reply)
+
+    # Language
+
+    @property
+    def language(self):
+        return self.__dict__.get('language')
+
+    @property.setter
+    def set_language(self, language):
+        self.__dict__.set('language', language)
+
+
+    ##
+    # Reply
+    ##
+
+    # Status ID
+
+    @property
+    def in_reply_to_status_id(self):
+        return self.__dict__.get('in_reply_to_status_id')
+
+    @property.setter
+    def set_in_reply_to_status_id(self, in_reply_to_status_id):
+        self.__dict__.set('in_reply_to_status_id', in_reply_to_status_id)
+
+    # Status User ID
+
+    @property
+    def in_reply_to_user_id(self):
+        return self.__dict__.get('in_reply_to_user_id')
+
+    @property.setter
+    def set_in_reply_to_user_id(self, in_reply_to_user_id):
+        self.__dict__.set('in_reply_to_user_id', in_reply_to_status_id)
+
+    # Status User Link
+
+    @property
+    def in_reply_to_user_link(self):
+        return self.__dict__.get('in_reply_to_user_link')
+
+    @property.setter
+    def set_in_reply_to_user_link(self, in_reply_to_user_link):
+        self.__dict__.set('in_reply_to_user_link', in_reply_to_status_id)
+
+    ##
+    # Repost
+    ##
+
+    # Status ID
+
+    @property
+    def reposted_status_id(self):
+        return self.__dict__.get('reposted_status_id')
+
+    @property.setter
+    def set_reposted_status_id(self, reposted_status_id):
+        self.__dict__.set('reposted_status_id', reposted_status_id)
+
+    # Status User ID
+
+    @property
+    def reposted_user_id(self):
+        return self.__dict__.get('reposted_user_id')
+
+    @property.setter
+    def set_reposted_user_id(self, reposted_user_id):
+        self.__dict__.set('reposted_user_id', reposted_status_id)
+
+    # Status User Link
+
+    @property
+    def reposted_user_link(self):
+        return self.__dict__.get('reposted_user_link')
+
+    @property.setter
+    def set_reposted_user_link(self, reposted_user_link):
+        self.__dict__.set('reposted_user_link', reposted_status_id)
+
+    ##
+    # Standardization and Output Methods
+    ##
 
     def to_element(self):
         """ Covert dict to lxml element. Only standard elements are inserted. If the
