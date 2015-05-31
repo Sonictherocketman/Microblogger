@@ -5,6 +5,8 @@ from lxml.builder import E
 from lxml.etree import CDATA
 from datetime import datetime
 from pytz import timezone
+from uuid import uuid4
+
 
 def _enum(**enums):
     return type('Enum', (), enums)
@@ -45,6 +47,10 @@ class Status(object):
         if entries is not None:
             self.__dict__.update(**entries)
 
+            # Check yourself.
+            self.status_type = status_type if status_type is not None \
+                else self._determine_status_type()
+
             if isinstance(entries.get('pubdate'), datetime):
                 self.pubdate = entries.get('pubdate')
             else:
@@ -52,35 +58,36 @@ class Status(object):
 
             if self.status_type == StatusType.REPOST:
                 self.reposted_status_pubdate = parse(self.reposted_status_pubdate)
+        else:
+            # When in doubt, just set to status.
+            self.status_type = StatusType.STATUS
 
         # Set the rest of the status up.
         self.user = user
         self.guid = uuid4().hex[-12:]
-        # Check yourself.
-        self.status_type = status_type if status_type is not None \
-                else self._determine_status_type()
+
 
     # Guid
 
-    @property
-    def guid(self):
+    def get_guid(self):
         return self.__dict__.get('guid')
 
-    @property.setter
     def set_guid(self, guid):
-        self.__dict__.set('guid', guid)
+        self.__dict__['guid'] = guid
+
+    guid = property(get_guid, set_guid)
 
     # PubDate
 
-    @property
-    def pubdate(self):
+    def get_pubdate(self):
         return self.__dict__.get('pubdate')
 
-    @property.setter
     def set_pubdate(self, pubdate):
-        if isinstance(pubdate, datetime):
+        if not isinstance(pubdate, datetime):
             raise ValueError('pubdate must be a datetime.')
-        self.__dict__.set('pubdate', pubdate)
+        self.__dict__['pubdate'] = pubdate
+
+    pubdate = property(get_pubdate, set_pubdate)
 
     @property
     def readable_pubdate(self):
@@ -90,36 +97,35 @@ class Status(object):
 
     # Description
 
-    @property
-    def description(self):
+    def get_description(self):
         return self.__dict__.get('description')
 
-    @property.setter
     def set_description(self, description):
         if len(description) > 200:
             raise ValueError('Description is too long.')
-        self.__dict__.set('description', description)
+        self.__dict__['description'] = description
+
+    description = property(get_description, set_description)
 
     # Reply
 
-    @property
-    def reply(self):
+    def get_reply(self):
         return self.__dict__.get('reply')
 
-    @property.setter
     def set_reply(self, reply):
-        self.__dict__.set('reply', reply)
+        self.__dict__['reply'] = reply
+
+    reply = property(get_reply, set_reply)
 
     # Language
 
-    @property
-    def language(self):
+    def get_language(self):
         return self.__dict__.get('language')
 
-    @property.setter
     def set_language(self, language):
-        self.__dict__.set('language', language)
+        self.__dict__['language'] = language
 
+    language = property(get_language, set_language)
 
     ##
     # Reply
@@ -127,33 +133,33 @@ class Status(object):
 
     # Status ID
 
-    @property
-    def in_reply_to_status_id(self):
+    def get_in_reply_to_status_id(self):
         return self.__dict__.get('in_reply_to_status_id')
 
-    @property.setter
     def set_in_reply_to_status_id(self, in_reply_to_status_id):
-        self.__dict__.set('in_reply_to_status_id', in_reply_to_status_id)
+        self.__dict__['in_reply_to_status_id'] = in_reply_to_status_id
+
+    in_reply_to_status_id = property(get_in_reply_to_status_id, set_in_reply_to_status_id)
 
     # Status User ID
 
-    @property
-    def in_reply_to_user_id(self):
+    def get_in_reply_to_user_id(self):
         return self.__dict__.get('in_reply_to_user_id')
 
-    @property.setter
     def set_in_reply_to_user_id(self, in_reply_to_user_id):
-        self.__dict__.set('in_reply_to_user_id', in_reply_to_status_id)
+        self.__dict__['in_reply_to_user_id'] = in_reply_to_status_id
+
+    in_reply_to_user_id = property(get_in_reply_to_user_id, set_in_reply_to_user_id)
 
     # Status User Link
 
-    @property
-    def in_reply_to_user_link(self):
+    def get_in_reply_to_user_link(self):
         return self.__dict__.get('in_reply_to_user_link')
 
-    @property.setter
     def set_in_reply_to_user_link(self, in_reply_to_user_link):
-        self.__dict__.set('in_reply_to_user_link', in_reply_to_status_id)
+        self.__dict__['in_reply_to_user_link'] = in_reply_to_status_id
+
+    in_reply_to_user_link = property(get_in_reply_to_user_link, set_in_reply_to_user_link)
 
     ##
     # Repost
@@ -161,33 +167,33 @@ class Status(object):
 
     # Status ID
 
-    @property
-    def reposted_status_id(self):
+    def get_reposted_status_id(self):
         return self.__dict__.get('reposted_status_id')
 
-    @property.setter
     def set_reposted_status_id(self, reposted_status_id):
-        self.__dict__.set('reposted_status_id', reposted_status_id)
+        self.__dict__['reposted_status_id'] = reposted_status_id
+
+    reposted_status_id = property(get_reposted_status_id, set_reposted_status_id)
 
     # Status User ID
 
-    @property
-    def reposted_user_id(self):
+    def get_reposted_user_id(self):
         return self.__dict__.get('reposted_user_id')
 
-    @property.setter
     def set_reposted_user_id(self, reposted_user_id):
-        self.__dict__.set('reposted_user_id', reposted_status_id)
+        self.__dict__['reposted_user_id'] = reposted_status_id
+
+    reposted_user_id = property(get_reposted_user_id, set_reposted_user_id)
 
     # Status User Link
 
-    @property
-    def reposted_user_link(self):
+    def get_reposted_user_link(self):
         return self.__dict__.get('reposted_user_link')
 
-    @property.setter
     def set_reposted_user_link(self, reposted_user_link):
-        self.__dict__.set('reposted_user_link', reposted_status_id)
+        self.__dict__['reposted_user_link'] = reposted_status_id
+
+    reposted_user_link = property(get_reposted_user_link, set_reposted_user_link)
 
     ##
     # Standardization and Output Methods

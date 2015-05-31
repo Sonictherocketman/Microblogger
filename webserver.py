@@ -86,7 +86,9 @@ def home():
     link = settings.get('registered_users').get(user_id).get('feed_location')
     user = User(local_url=link)
     posts = user.home_timeline()
-    return render_template('timeline.html', posts=posts, user=user, page_type='timeline')
+    auth = True if 'user_id' in session else False
+    return render_template('timeline.html', posts=posts, user=user,
+            page_type='timeline', auth=auth)
 
 
 # Login/Registration
@@ -278,7 +280,9 @@ def get_user_profile(username):
         # User is remote.
         # TODO
         pass
-    return render_template('timeline.html', user=user, posts=user.user_timeline(), page_type='profile')
+    auth = True if 'user_id' in session else False
+    return render_template('profile.html', user=user, posts=user.user_timeline(),
+            page_type='profile', auth=auth)
 
 
 @app.route('/<username>/follows', methods=['GET'])
@@ -292,7 +296,9 @@ def get_user_follows(username):
         # User is remote.
         # TODO
         pass
-    return render_template('follows.html', user=user, follows=user.follows, page_type='following')
+    auth = True if 'user_id' in session else False
+    return render_template('follows.html', user=user, follows=user.follows,
+            page_type='following', auth=auth)
 
 
 @app.route('/<username>/blocks', methods=['GET'])
@@ -306,10 +312,12 @@ def get_user_blocks(username):
         # User is remote.
         # TODO
         pass
-    return render_template('blocks', user=user, blocks=user.blocks)
+    auth = True if 'user_id' in session else False
+    return render_template('blocks.html', user=user, blocks=user.blocks,
+            page_type='blocking', auth=auth)
 
 
-@app.route('/<username>/<status_id>', methods=['GET'])
+@app.route('/<username>/status/<status_id>', methods=['GET'])
 @login_required
 def get_user_status(username, status_id):
     """ Get a given status by a given user. """
@@ -324,7 +332,7 @@ def get_user_status(username, status_id):
     posts = [post for post in posts if post.guid == status_id]
     if len(posts) > 0:
         post = posts[0]
-        return render_template('individual_post.html', user=user, post=post)
+        return render_template('individual_post.html', user=user, status=post)
     else:
         # TODO 404
         pass
@@ -369,24 +377,32 @@ def post_messages():
 @limiter.limit('100 per 15 minute')
 def post_status():
     """ Adds a new post to the feed. """
-    status_text = request.form['post-text'].strip()
-    user_id = session['user_id']
-    if len(status_text) > 200:
-        return redirect(url_for('home', error='Too many characters'))
-    elif status_text == '':
-        return redirect(url_for('home', error='Post cannot be empty'))
-    user_dict = settings.get_user(user_id)
-    if user_dict is not None:
-        user = User(local_url=user_dict['feed_location'])
-        guid = uuid4().hex[-12:]
-        reply_url = '{0}/status/{1}/reply'.format(user.profile, guid)
-        status = Status({
-            'description': status_text,
-            'pubdate': datetime.now(pytz.UTC),
-            'guid': guid,
-            'reply': reply_url
-            })
-        user.add_post(status)
+    form = request.form
+    status = Status()
+    status.description = form['status_text']
+    # Reply or Repost
+    repost = form.get('repost')
+    reply = form.get('reply')
+    if repost or reply:
+        status.reposted_user_id = form['user_id']
+        status.reposted_user_link = form['user_link']
+        if repost:
+            status.reposted_status_id = form['status_id']
+            status.reposted_status_pubdate = form['status_pubdate']
+
+    my_user_id = session['user_id']
+    my_user_dict = settings.get_user(my_user_id)
+    user = User(local_url=my_user_dict['feed_location'])
+
+    guid = uuid4().hex[-12:]
+    reply_url = '{0}/status/{1}/reply'.format(user.profile, guid)
+    status = Status({
+        'description': status_text,
+        'pubdate': datetime.now(pytz.UTC),
+        'guid': guid,
+        'reply': reply_url
+        })
+    user.add_post(status)
     return redirect(url_for('home'))
 
 

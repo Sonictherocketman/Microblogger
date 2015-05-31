@@ -66,9 +66,6 @@ def _search_recurs(rel_location, xpath_qry):
     item = feed.xpath(xpath_qry)
     next_node = feed.xpath('//next_node')
 
-    print xpath_qry
-    print item
-
     if len(item) > 0:
         return rel_location, item[0].get('guid')
     elif next_node:
@@ -166,8 +163,25 @@ class User(object):
     LOCAL users. REMOTE users may become CACHED under certain conditions and
     CACHED users may revert to REMOTE status if unused for a period.
 
-    @since 2015-04-15 ONLY LOCAL AND CACHED USERS ARE SUPPORTED
+    This class may seem enormous, and that is because it handles retrieving
+    data from local disk, remote servers, and users cached in memory (soon
+    also from SQLAlchemy). Breaking this functionality out, or reorganizing how
+    the application stores it's data is up for discussion.
+
+    @author Brian Schrader
+    @since 2015-05-30
     """
+
+    RESERVED = ('element',)
+    UB_ELEMENTS = {'status_id', 'username', 'user_id', 'profile', 'next_node',
+            'relocate', 'user_full_name', 'next_node', 'blocks', 'follows',
+            'message', 'reply', 'in_reply_to_status_id', 'in_reply_to_user_id',
+            'in_reply_to_user_link', 'reposted_status_id', 'reposted_status_pubdate',
+            'reposted_status_user_id', 'reposted_status_user_link', 'portrait',
+            'header'}
+    NSMAP = {
+            'ub': 'http://openmicroblog.com/',
+        }
 
     def __init__(self, local_url=None, remote_url=None, entries=None, force_cache=False):
         if isinstance(entries, dict):
@@ -218,11 +232,15 @@ class User(object):
     def _generate_new_user_feed(location):
         """ Creates a blank XML feed and writes it. To fill in the
         information for the feed use the other helper methods provided. """
+        # TODO: Add Namespacing
         feed = E.channel(
                 E.username(''),
                 E.user_id(''),
                 E.user_full_name(''),
                 E.description(CDATA('')),
+                E.header(''),
+                E.portrait(''),
+                E.profile(''),
                 E.link(''),
                 E.blocks('', count='0'),
                 E.follows('', count='0'),
@@ -278,6 +296,8 @@ class User(object):
         the user's cached values will be used (unless cleared).
         """
         if self._status == DataLocations.LOCAL:
+            if attr in User.UB_ELEMENTS:
+                xpath = xpath.replace(attr, 'ub:{attr}'.format(attr=attr))
             return self._get_attr_el(self._rel_location, attr, xpath)[0].text
         elif self._status == DataLocations.REMOTE:
             self.cache_user()
@@ -288,6 +308,9 @@ class User(object):
         local user, then that user's cached values are updated.
         """
         if self._status == DataLocations.LOCAL:
+            if attr in User.UB_ELEMENTS:
+                xpath = xpath.replace(attr, 'ub:{attr}'.format(
+                    ns=User.NSMAP.get('ub'), attr=attr)),
             _set_to_feed(self._rel_location, xpath, value)
         elif self._status == DataLocations.REMOTE:
             raise RemoteUserPropertyError
@@ -301,7 +324,7 @@ class User(object):
         if self._status != DataLocations.LOCAL:
             raise UserNotBackedError(\
                     'To get the elements of a feed, the user must be local.')
-        return u.get_user_feed(location).xpath(xpath)
+        return u.get_user_feed(location).xpath(xpath, namespaces=User.NSMAP)
 
 
     ################# Caching ###################
@@ -415,6 +438,34 @@ class User(object):
 
     link = property(get_link, set_link)
 
+    # Portrait
+
+    def get_portrait(self):
+        return self._get_attr(self.get_portrait.binding,
+                '//channel/portrait')
+    get_portrait.binding = 'portrait'
+
+    def set_portrait(self, portrait):
+        self._set_attr(self.set_portrait.binding,
+                '//channel/portrait', portrait)
+    set_portrait.binding = 'portrait'
+
+    portrait = property(get_portrait, set_portrait)
+
+    # Header
+
+    def get_header(self):
+        return self._get_attr(self.get_header.binding,
+                '//channel/header')
+    get_header.binding = 'header'
+
+    def set_header(self, header):
+        self._set_attr(self.set_header.binding,
+                '//channel/header', header)
+    set_header.binding = 'header'
+
+    header = property(get_header, set_header)
+
     # Language
 
     def get_language(self):
@@ -480,8 +531,8 @@ class User(object):
         """ Get the list of the people the user follows. """
         blocks = []
         if self._status == DataLocations.LOCAL:
-            location = SettingsManager.get_user()['blocks_location']
-            feed = u.get_user_feed('user/blocks.xml')
+            location = SettingsManager.get_user(self.user_id)['blocks_location']
+            feed = u.get_user_feed(location)
             blocks_el = feed.xpath('//channel/item')
             for user_el in blocks_el:
                 user_dict = _recursive_dict(user_el)[1]
