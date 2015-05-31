@@ -95,6 +95,26 @@
 	font-style: italic;
 	font-size: small;
  }
+ 
+ .post-options {
+ 	margin-right:auto;
+ 	margin-left:auto;
+ }
+ 
+ ul.options {
+ 	list-style: none;
+ }
+ ul.options li {
+ 	display:inline;
+ 	margin-right:5px;
+ 	margin-left:5px;
+ }
+ 
+ .time {
+ 	color:grey;
+ 	font-style:italic;
+ 	font-size:small;
+ }
 
 /*
  * Toolbar styling

@@ -1,6 +1,43 @@
 /**
- *
+ * Timeline actions
  */
+ 
+ function retweet(el) {
+ 	el = $(el)
+ 	$.post(el.attr('href'), { 
+ 		username: el.attr('username'),
+ 		user_id: el.attr('user_id'),
+ 		user_link: el.attr('user_link'),
+ 		status_id: el.attr('status_id'),
+ 		status_pubdate: el.attr('status_pubdate')
+ 	}).done(function() { el.attr('disabled'); })
+ 	.error(function() { alert('failed') });
+ }
+ 
+ function block(el) {
+ 	el = $(el)
+ 	$.post(el.attr('href'), { 
+ 		username: el.attr('username'),
+ 		user_id: el.attr('user_id'),
+ 		user_link: el.attr('user_link')
+ 	}).done(function() { el.attr('disabled'); })
+ 	.error(function() { alert('failed') });  
+ }
+ 
+ function follow(el) {
+ 	el = $(el)
+ 	$.post(el.attr('href'), { 
+ 		username: el.attr('username'),
+ 		user_id: el.attr('user_id'),
+ 		user_link: el.attr('user_link')
+ 	}).done(function() { el.attr('disabled'); })
+ 	.error(function() { alert('failed') }); 
+ }
+ 
+ function del(el) {
+ 
+ }
+ 
  
 /*
  * Button/Link functions

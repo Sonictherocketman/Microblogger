@@ -14,14 +14,7 @@
 		<div class='bio'>{{ user.description }}</div>
 	</div>
 	<div class="panel-footer">
-		<div class="btn-group btn-group-justified" role="group" aria-label="...">
-  			<div class="btn-group" role="group">
-			  <a href="{{ user.profile }}" type="button" class="btn btn-default {{ 'active' if page_type == 'profile' }}">Posts</a>
-			</div>
-  			<div class="btn-group" role="group">
-			  <a href="/{{ user.username}}/follows" type="button" class="btn btn-default {{ 'active' if page_type == 'following' }}">Following</a>
-			</div>
-		</div>
+		{% include 'profile_menu.html' %}
 	</div>
 </div>
 {% endblock %}
@@ -32,6 +25,6 @@
 		{% include 'no_entries.html' %}
 	{% endif %}
 	{% for user in follows %}
-		{% include 'user.html' %}
+		{% include 'follows_user.html' %}
 	{% endfor %}
 {% endblock %}		

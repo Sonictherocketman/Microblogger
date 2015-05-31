@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}This is the title{% endblock %}
+
+{% block profile %}
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class='panel-title'>
+			<span class='user_full_name'>{{ user.full_name }}</span>
+			<span class='username'><a href='{{ user.profile }}'>@{{ user.username }}</a></span>
+		</div>
+	</div>
+	<div class="panel-body">
+		<div class='bio'>{{ user.description }}</div>
+	</div>
+	<div class="panel-footer">
+		{% include 'profile_menu.html' %}
+	</div>
+</div>
+{% endblock %}
+
+{% block post_list %}
+	{# Add the posts to the list. #}
+	{% for status in posts %}
+		{% include 'post.html' %}
+	{% endfor %}
+{% endblock %}		

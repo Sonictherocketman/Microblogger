@@ -1,14 +1,25 @@
-{% extends "simple_layout.html" %}
-
-{% block head %}
-<link rel='stylesheet' type='text/css' href='/static/css/styles.css' />
-<script type='text/javascript' src='/static/js/timeline.js'></script>
-{% endblock %}
+{% extends "layout.html" %}
 
 {% block title %}This is the title{% endblock %}
 
-{{ post }}
+{% block profile %}
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class='panel-title'>
+			<span class='user_full_name'>{{ user.full_name }}</span>
+			<span class='username'><a href='{{ user.profile }}'>@{{ user.username }}</a></span>
+		</div>
+	</div>
+	<div class="panel-body">
+		<div class='bio'>{{ user.description }}</div>
+	</div>
+	<div class="panel-footer">
+		{% include 'profile_menu.html' %}
+	</div>
+</div>
+{% endblock %}
 
 {% block post_list %}
 	{% include 'post.html' %}
-{% endblock %}
+{% endblock %}		
+

@@ -8,6 +8,67 @@
 		<span class='time'>{{ status.readable_pubdate }}</span>
 	</div>
 	<div class='post-options'>
+		{% if auth %}
 		<!-- This is where the 'reply', 'get link to', etc options will go. -->
+		<ul class='options'>
+			{% if status.user.user_id != user.user_id %}
+			<!-- Retweet -->
+			<!-- Only show this if user is logged in and this is NOT one of their posts. -->
+			<li>
+				<button class='btn-link' 
+					onclick='retweet(this)' 
+					username='{{ status.user.username }}'
+					user_id='{{ status.user.user_id }}'
+					user_link='{{ status.user.link }}'
+					status_id='{{ status.guid }}'
+					status_pubdate='{{ status.pubdate }}'
+					href='{{ url_for('post_status') }}'>
+						<span class='glyphicon glyphicon-retweet'></span>
+				</button>
+			</li>
+			{#
+			<!-- Follow -->
+			<!-- Only show this if user is logged in and this user isn't them. -->
+			<li>
+				<button class='btn-link' 
+					onclick='follow(this)' 
+					username='{{ status.user.username }}'
+					user_id='{{ status.user.user_id }}'
+					user_link='{{ status.user.link }}'
+					href='{{ url_for('post_follow') }}'>
+						<span class='glyphicon glyphicon-plus'></span>
+				</button>
+			</li>
+			#}
+			<!-- Block -->
+			<!-- Only show this if user is logged in and this user isn't them. -->
+			<li>
+				<button class='btn-link' 
+					onclick='block(this)' 
+					username='{{ status.user.username }}'
+					user_id='{{ status.user.user_id }}'
+					user_link='{{ status.user.link }}'
+					href='{{ url_for('post_block') }}'>
+						<span class='glyphicon glyphicon-ban-circle'></span>
+				</button>			
+			</li>
+			{% endif %}
+			{% if status.user.user_id == user.user_id %}
+			{#
+			<!-- Delete -->
+			<!-- Only show this if user is logged in and this is one of their posts. -->
+			<li>
+				<button class='btn-link' 
+					onclick='del(this)' 
+					user_id='{{ status.user.user_id }}'
+					status_id='{{ status.guid }}'
+					href='{{ url_for('post_delete') }}'>
+						<span class='glyphicon glyphicon-trash warning'></span>
+				</button>
+			</li>
+			#}
+			{% endif %}
+		</ul>
+		{% endif %}
 	</div>
 </div>
