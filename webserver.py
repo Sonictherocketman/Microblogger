@@ -10,7 +10,7 @@ from uuid import uuid4
 from functools import wraps
 
 from flask import Flask, request, session, url_for, redirect,\
-    render_template, abort
+    render_template, abort, Response
 from werkzeug import check_password_hash, generate_password_hash
 from flask_limiter import Limiter
 
@@ -18,10 +18,13 @@ from cachemanager import CacheManager
 from settingsmanager import SettingsManager as settings
 from model.user import User
 from model.status import Status
+from model.shared import db
 
 # Init the application
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////etc/microblog/microblog.db'
 limiter = Limiter(app)
+db.init_app(app)
 app.debug = True
 app.secret_key = settings.get('secret')
 CacheManager(cache_location=settings.get('cache_location'))
@@ -474,7 +477,7 @@ def feed(username):
     """ This just returns the user's XML feed. """
     location = user_for_username(username)['feed_location']
     with open(location) as f:
-        return f.read()
+        return Response(f.read(), mimetype='text/xml')
 
 
 @app.route('/<username>/blocks.xml', methods=['GET'])
@@ -482,7 +485,7 @@ def blocks(username):
     """ Returns the user's block list. """
     location = user_for_username(username)['blocks_location']
     with open(location) as f:
-        return f.read()
+        return Response(f.read(), mimetype='text/xml')
 
 
 @app.route('/<username>/follows.xml', methods=['GET'])
@@ -490,7 +493,7 @@ def follows(username):
     """ Returns the user's block list. """
     location = user_for_username(username)['follows_location']
     with open(location) as f:
-        return f.read()
+        return Response(f.read(), mimetype='text/xml')
 
 
 if __name__ == '__main__':

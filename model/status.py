@@ -12,7 +12,7 @@ def _enum(**enums):
     return type('Enum', (), enums)
 
 
-DATE_STR_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
+DATE_STR_FORMAT = '%a, %d %b %Y %H:%M:%S %z'
 READABLE_DATE_STR_FORMAT = '%m/%d/%Y %I:%M %p'
 
 # Status Model

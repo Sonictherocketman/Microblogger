@@ -10,6 +10,7 @@ from dateutil.parser import parse
 import util as u
 from settingsmanager import SettingsManager
 from status import StatusType, Status, _recursive_dict
+from shared import db
 
 # Misc Utilities
 
@@ -180,7 +181,7 @@ class User(object):
             'reposted_status_user_id', 'reposted_status_user_link', 'portrait',
             'header'}
     NSMAP = {
-            'ub': 'http://openmicroblog.com/',
+            'microblog': 'http://openmicroblog.com/',
         }
 
     def __init__(self, local_url=None, remote_url=None, entries=None, force_cache=False):
@@ -297,7 +298,7 @@ class User(object):
         """
         if self._status == DataLocations.LOCAL:
             if attr in User.UB_ELEMENTS:
-                xpath = xpath.replace(attr, 'ub:{attr}'.format(attr=attr))
+                xpath = xpath.replace(attr, 'microblog:{attr}'.format(attr=attr))
             return self._get_attr_el(self._rel_location, attr, xpath)[0].text
         elif self._status == DataLocations.REMOTE:
             self.cache_user()
@@ -309,8 +310,8 @@ class User(object):
         """
         if self._status == DataLocations.LOCAL:
             if attr in User.UB_ELEMENTS:
-                xpath = xpath.replace(attr, 'ub:{attr}'.format(
-                    ns=User.NSMAP.get('ub'), attr=attr)),
+                xpath = xpath.replace(attr, 'microblog:{attr}'.format(
+                    ns=User.NSMAP.get('microblog'), attr=attr)),
             _set_to_feed(self._rel_location, xpath, value)
         elif self._status == DataLocations.REMOTE:
             raise RemoteUserPropertyError
